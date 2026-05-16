@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+
+# SQLite database (regenerate with: cd server && npm run seed)
+server/atomquest.db
+server/atomquest.db-shm
+server/atomquest.db-wal
+
+.DS_Store
+.vite/

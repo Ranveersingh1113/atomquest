@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc \"6a06fcd06885a_AtomQuest_Hackathon_1.0_Problem_Statement_.docx\" -o problem_statement.md)",
+      "Bash(python \"C:/Users/ricky/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/b208ef60-932f-437b-bdd4-8a7f47e83419/7fe640c3-d3ce-460e-863a-b98946f733d8/skills/docx/scripts/office/unpack.py\" \"6a06fcd06885a_AtomQuest_Hackathon_1.0_Problem_Statement_.docx\" unpacked/)",
+      "Bash(python -c \"import sys; print\\('\\\\n'.join\\(l.rstrip\\(\\) for l in sys.stdin\\)\\)\")",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(rm -rf node_modules package-lock.json)",
+      "Bash(node -e \"const{DatabaseSync}=require\\('node:sqlite'\\);const d=new DatabaseSync\\(':memory:'\\);d.exec\\('CREATE TABLE t\\(id INTEGER PRIMARY KEY,n TEXT\\)'\\);const r=d.prepare\\('INSERT INTO t\\(n\\) VALUES\\(?\\)'\\).run\\('x'\\);console.log\\('lastId',r.lastInsertRowid,typeof r.lastInsertRowid\\);console.log\\('get',d.prepare\\('SELECT * FROM t'\\).get\\(\\)\\)\")",
+      "Bash(node seed.js)",
+      "Bash(node index.js)",
+      "Bash(curl -s -X POST localhost:4000/api/login -H 'Content-Type: application/json' -d '{\"email\":\"karan@atomquest.com\",\"password\":\"password\"}')",
+      "Bash(taskkill //F //IM node.exe)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s localhost:4000/api/health)",
+      "Bash(curl -s -X POST localhost:4000/api/login -H 'Content-Type: application/json' -d '{\"email\":\"amit@atomquest.com\",\"password\":\"password\"}')",
+      "Bash(npm run *)"
+    ]
+  }
+}
