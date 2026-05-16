@@ -6,7 +6,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 
-const COLORS = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const COLORS = ['#f5a623', '#0ea5e9', '#16a34a', '#fb923c', '#ef4444', '#8b5cf6', '#14b8a6'];
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
 
 function Panel({ title, children }) {
@@ -46,7 +46,7 @@ export default function Analytics() {
               <YAxis tick={{ fontSize: 12 }} unit="%" />
               <Tooltip />
               <Line type="monotone" dataKey="avgProgress" name="Avg weighted progress"
-                stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }} />
+                stroke="#f5a623" strokeWidth={3} dot={{ r: 4, fill: '#f5a623' }} />
             </LineChart>
           </ResponsiveContainer>
         </Panel>
@@ -88,8 +88,8 @@ export default function Analytics() {
                 cx="50%" cy="50%" outerRadius={90} label>
                 {data.distribution.byStatus.map((entry, i) => (
                   <Cell key={i} fill={
-                    entry.name === 'Completed' ? '#10b981'
-                      : entry.name === 'On Track' ? '#f59e0b' : '#94a3b8'} />
+                    entry.name === 'Completed' ? '#16a34a'
+                      : entry.name === 'On Track' ? '#f5a623' : '#cbd5e1'} />
                 ))}
               </Pie>
               <Tooltip />

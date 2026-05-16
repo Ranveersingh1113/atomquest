@@ -56,7 +56,7 @@ export function PageHeader({ title, subtitle, actions }) {
 
 /* ---------- Button ---------- */
 const btnVariants = {
-  primary: 'bg-brand-600 text-white shadow-sm shadow-brand-600/25 hover:bg-brand-700 disabled:bg-brand-300 disabled:shadow-none',
+  primary: 'bg-brand-500 text-ink-950 shadow-sm shadow-brand-500/30 hover:bg-brand-400 disabled:bg-brand-200 disabled:text-ink-700 disabled:shadow-none',
   secondary: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50',
   danger: 'bg-rose-600 text-white shadow-sm shadow-rose-600/25 hover:bg-rose-700 disabled:bg-rose-300',
   success: 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 hover:bg-emerald-700 disabled:bg-emerald-300',
@@ -154,7 +154,7 @@ export function Modal({ open, onClose, title, children, wide }) {
 
 /* ---------- Data viz ---------- */
 function progressColor(pct) {
-  return pct >= 90 ? '#10b981' : pct >= 60 ? '#6366f1' : pct >= 30 ? '#f59e0b' : '#f43f5e';
+  return pct >= 80 ? '#16a34a' : pct >= 50 ? '#f5a623' : pct >= 25 ? '#fb923c' : '#ef4444';
 }
 export function ProgressBar({ value, max = 100 }) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));

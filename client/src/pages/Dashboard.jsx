@@ -31,15 +31,16 @@ export default function Dashboard() {
 
 function Hero({ user, cycle, children }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-violet-700 p-6 text-white aq-fade">
-      <div className="absolute -right-10 -top-16 w-56 h-56 rounded-full bg-white/10" />
-      <div className="absolute -right-24 top-10 w-56 h-56 rounded-full bg-white/5" />
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950 p-6 text-white aq-fade">
+      <div className="absolute -right-16 -top-28 w-80 h-80 rounded-full bg-brand-500/20 blur-3xl aq-glow" />
+      <div className="absolute right-28 -bottom-20 w-48 h-48 rounded-full bg-brand-500/10 blur-2xl" />
       <div className="relative flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-widest text-white/60">
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-brand-400">
             {cycle.name} · {cycle.fy}
           </div>
-          <h1 className="text-2xl font-extrabold mt-1">Welcome back, {user.name.split(' ')[0]}</h1>
+          <h1 className="text-2xl font-extrabold mt-1.5">Welcome back, {user.name.split(' ')[0]}</h1>
+          <p className="text-sm text-slate-400 mt-1">Here&#39;s an overview of your performance this cycle.</p>
         </div>
         {children}
       </div>
@@ -51,17 +52,17 @@ function HeroRing({ value, caption }) {
   const pct = Math.max(0, Math.min(100, value));
   const r = 34, c = 2 * Math.PI * r;
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-2xl bg-white/[0.04] ring-1 ring-white/[0.08] px-4 py-3">
       <div className="relative grid place-items-center w-[84px] h-[84px]">
         <svg width="84" height="84" className="-rotate-90">
-          <circle cx="42" cy="42" r={r} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="8" />
-          <circle cx="42" cy="42" r={r} fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round"
+          <circle cx="42" cy="42" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+          <circle cx="42" cy="42" r={r} fill="none" stroke="#f5a623" strokeWidth="8" strokeLinecap="round"
             strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c}
             style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(0.16,1,0.3,1)' }} />
         </svg>
         <span className="absolute text-xl font-extrabold">{Math.round(pct)}%</span>
       </div>
-      <div className="text-sm font-medium text-white/80 max-w-[110px]">{caption}</div>
+      <div className="text-sm font-medium text-slate-300 max-w-[110px]">{caption}</div>
     </div>
   );
 }
