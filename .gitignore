@@ -9,3 +9,4 @@ server/atomquest.db-wal
 
 .DS_Store
 .vite/
+.claude/settings.local.json
