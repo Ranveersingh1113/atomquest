@@ -15,7 +15,12 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(curl -s localhost:4000/api/health)",
       "Bash(curl -s -X POST localhost:4000/api/login -H 'Content-Type: application/json' -d '{\"email\":\"amit@atomquest.com\",\"password\":\"password\"}')",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git rm *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)"
     ]
   }
 }

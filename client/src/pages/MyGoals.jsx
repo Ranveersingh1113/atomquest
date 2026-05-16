@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import {
   Card, PageHeader, Button, Badge, Banner, Spinner, EmptyState, ProgressBar,
-  Field, Select, sheetStatusBadge, goalStatusBadge, UOM_LABELS,
+  Select, Ring, sheetStatusBadge,
 } from '../ui.jsx';
 import GoalFormModal from '../components/GoalFormModal.jsx';
 import AchievementModal from '../components/AchievementModal.jsx';
+import GoalCard from '../components/GoalCard.jsx';
 
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
-export const scorePct = (s) => (s == null ? '—' : `${Math.round(s * 100)}%`);
 
 export default function MyGoals() {
   const [sheet, setSheet] = useState(null);
@@ -116,8 +116,13 @@ export default function MyGoals() {
       )}
 
       {approved && (
-        <Card className="p-3 mb-4 flex items-center gap-3">
-          <Field label="">
+        <Card className="p-4 mb-4 flex items-center gap-4">
+          <Ring value={sheet.quarterScores[quarter]} size={64} stroke={7} />
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-bold text-slate-900">{quarter} weighted progress</div>
+            <div className="text-xs text-slate-400">Weighted score across all goals on this sheet</div>
+          </div>
+          <div className="w-44 shrink-0">
             <Select value={quarter} onChange={(e) => setQuarter(e.target.value)}>
               {QUARTERS.map((q) => (
                 <option key={q} value={q} disabled={!cycle.openQuarters?.includes(q)}>
@@ -125,10 +130,6 @@ export default function MyGoals() {
                 </option>
               ))}
             </Select>
-          </Field>
-          <div className="text-sm text-slate-600">
-            {quarter} weighted progress:{' '}
-            <span className="font-bold text-brand-700">{sheet.quarterScores[quarter]}%</span>
           </div>
         </Card>
       )}
@@ -143,65 +144,23 @@ export default function MyGoals() {
         <div className="space-y-3">
           {goals.map((g) => {
             const ach = g.achievements?.[quarter];
+            const footer = editable ? (
+              <>
+                <Button variant="secondary" onClick={() => setEditGoal(g)}>Edit</Button>
+                {!g.is_shared_copy && <Button variant="ghost" onClick={() => removeGoal(g)}>Delete</Button>}
+              </>
+            ) : approved ? (
+              g.is_shared_copy ? (
+                <span className="text-xs text-slate-400 self-center">Synced from owner</span>
+              ) : (
+                <Button disabled={!cycle.openQuarters?.includes(quarter)}
+                  onClick={() => setTrackGoal(g)}>
+                  {ach ? 'Update' : 'Log'} {quarter}
+                </Button>
+              )
+            ) : null;
             return (
-              <Card key={g.id} className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge color="indigo">{g.thrust_area}</Badge>
-                      {g.is_shared_copy && <Badge color="blue">Shared KPI</Badge>}
-                      <span className="text-xs text-slate-400">{UOM_LABELS[g.uom_type]}</span>
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mt-1.5">{g.title}</h3>
-                    {g.description && <p className="text-sm text-slate-500 mt-0.5">{g.description}</p>}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-2xl font-bold text-slate-900">{g.weightage}%</div>
-                    <div className="text-[11px] text-slate-400 uppercase">weightage</div>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                  <span className="text-slate-500">
-                    Target: <span className="font-medium text-slate-800">
-                      {g.uom_type === 'timeline' ? (g.target_date || '—')
-                        : g.uom_type === 'zero' ? '0' : g.target}
-                    </span>
-                  </span>
-                  {approved && (
-                    <>
-                      <span className="text-slate-500">
-                        {quarter} Actual: <span className="font-medium text-slate-800">
-                          {ach ? (g.uom_type === 'timeline' ? (ach.completion_date || '—') : (ach.actual_value ?? '—')) : '—'}
-                        </span>
-                      </span>
-                      <span className="text-slate-500">
-                        Score: <span className="font-medium text-brand-700">{scorePct(g.scores[quarter])}</span>
-                      </span>
-                      {ach && <Badge color={goalStatusBadge[ach.status]}>{ach.status}</Badge>}
-                    </>
-                  )}
-                  <div className="ml-auto flex gap-2">
-                    {editable && (
-                      <>
-                        <Button variant="secondary" onClick={() => setEditGoal(g)}>Edit</Button>
-                        {!g.is_shared_copy &&
-                          <Button variant="ghost" onClick={() => removeGoal(g)}>Delete</Button>}
-                      </>
-                    )}
-                    {approved && !g.is_shared_copy && (
-                      <Button
-                        disabled={!cycle.openQuarters?.includes(quarter)}
-                        onClick={() => setTrackGoal(g)}>
-                        {ach ? 'Update' : 'Log'} {quarter}
-                      </Button>
-                    )}
-                    {approved && g.is_shared_copy && (
-                      <span className="text-xs text-slate-400 self-center">Synced from primary owner</span>
-                    )}
-                  </div>
-                </div>
-              </Card>
+              <GoalCard key={g.id} goal={g} showTracking={approved} quarter={quarter} footer={footer} />
             );
           })}
         </div>

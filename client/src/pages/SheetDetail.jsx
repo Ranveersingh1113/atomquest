@@ -3,13 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import {
-  Card, PageHeader, Button, Badge, Banner, Spinner, ProgressBar,
-  Modal, Field, Textarea, Select, sheetStatusBadge, goalStatusBadge, UOM_LABELS,
+  Card, PageHeader, Button, Badge, Banner, Spinner, Ring,
+  Modal, Field, Textarea, Select, sheetStatusBadge,
 } from '../ui.jsx';
 import GoalFormModal from '../components/GoalFormModal.jsx';
+import GoalCard from '../components/GoalCard.jsx';
 
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
-const scorePct = (s) => (s == null ? '—' : `${Math.round(s * 100)}%`);
 
 export default function SheetDetail() {
   const { id } = useParams();
@@ -103,16 +103,19 @@ export default function SheetDetail() {
       )}
 
       {sheet.status === 'approved' && (
-        <Card className="p-3 mb-4 flex items-center gap-3 flex-wrap">
-          <Select value={quarter} onChange={(e) => setQuarter(e.target.value)} >
-            {QUARTERS.map((q) => <option key={q} value={q}>{q}</option>)}
-          </Select>
-          <span className="text-sm text-slate-600">
-            {quarter} weighted progress:{' '}
-            <span className="font-bold text-brand-700">{sheet.quarterScores[quarter]}%</span>
-          </span>
+        <Card className="p-4 mb-4 flex items-center gap-4 flex-wrap">
+          <Ring value={sheet.quarterScores[quarter]} size={64} stroke={7} />
+          <div className="flex-1 min-w-[160px]">
+            <div className="text-sm font-bold text-slate-900">{quarter} weighted progress</div>
+            <div className="text-xs text-slate-400">Planned vs. actual across the goal sheet</div>
+          </div>
+          <div className="w-32">
+            <Select value={quarter} onChange={(e) => setQuarter(e.target.value)}>
+              {QUARTERS.map((q) => <option key={q} value={q}>{q}</option>)}
+            </Select>
+          </div>
           {canCheckin && (
-            <Button className="ml-auto" onClick={() => {
+            <Button onClick={() => {
               setCheckinText(sheet.checkins[quarter]?.comment || ''); setCheckinOpen(true);
             }}>
               {sheet.checkins[quarter] ? 'Edit' : 'Add'} {quarter} Check-in
@@ -128,53 +131,15 @@ export default function SheetDetail() {
       )}
 
       <div className="space-y-3">
-        {sheet.goals.map((g) => {
-          const ach = g.achievements?.[quarter];
-          return (
-            <Card key={g.id} className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge color="indigo">{g.thrust_area}</Badge>
-                    {g.is_shared_copy && <Badge color="blue">Shared KPI</Badge>}
-                    <span className="text-xs text-slate-400">{UOM_LABELS[g.uom_type]}</span>
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mt-1.5">{g.title}</h3>
-                  {g.description && <p className="text-sm text-slate-500 mt-0.5">{g.description}</p>}
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="text-2xl font-bold text-slate-900">{g.weightage}%</div>
-                  <div className="text-[11px] text-slate-400 uppercase">weightage</div>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                <span className="text-slate-500">Target:{' '}
-                  <span className="font-medium text-slate-800">
-                    {g.uom_type === 'timeline' ? (g.target_date || '—') : g.uom_type === 'zero' ? '0' : g.target}
-                  </span>
-                </span>
-                {sheet.status === 'approved' && (
-                  <>
-                    <span className="text-slate-500">{quarter} Actual:{' '}
-                      <span className="font-medium text-slate-800">
-                        {ach ? (g.uom_type === 'timeline' ? (ach.completion_date || '—') : (ach.actual_value ?? '—')) : '—'}
-                      </span>
-                    </span>
-                    <span className="text-slate-500">Score:{' '}
-                      <span className="font-medium text-brand-700">{scorePct(g.scores[quarter])}</span>
-                    </span>
-                    {ach && <Badge color={goalStatusBadge[ach.status]}>{ach.status}</Badge>}
-                  </>
-                )}
-                {canReview && (
-                  <Button variant="secondary" className="ml-auto" onClick={() => setEditGoal(g)}>
-                    Adjust target / weightage
-                  </Button>
-                )}
-              </div>
-            </Card>
-          );
-        })}
+        {sheet.goals.map((g) => (
+          <GoalCard key={g.id} goal={g}
+            showTracking={sheet.status === 'approved'} quarter={quarter}
+            footer={canReview && (
+              <Button variant="secondary" onClick={() => setEditGoal(g)}>
+                Adjust target / weightage
+              </Button>
+            )} />
+        ))}
       </div>
 
       {canReview && (

@@ -3,8 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import {
-  Card, PageHeader, Badge, Spinner, EmptyState, Button, sheetStatusBadge,
+  Card, PageHeader, Badge, Spinner, EmptyState, Button, Icon, sheetStatusBadge,
 } from '../ui.jsx';
+
+const STATUS_ACCENT = {
+  approved: 'bg-emerald-500', submitted: 'bg-blue-500',
+  returned: 'bg-amber-500', draft: 'bg-slate-300',
+};
 
 export default function Team() {
   const { user } = useAuth();
@@ -60,20 +65,26 @@ export default function Team() {
           {shown.map((s) => {
             const [color, text] = sheetStatusBadge[s.status];
             return (
-              <Card key={s.id} className="p-4 flex flex-wrap items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">
-                  {s.employee_name.split(' ').map((n) => n[0]).join('')}
-                </div>
-                <div className="min-w-[140px] flex-1">
-                  <div className="font-semibold text-slate-900 truncate">{s.employee_name}</div>
-                  <div className="text-xs text-slate-400 truncate">
-                    {s.department} · {s.goals.length} goals · {s.totalWeightage}% weighted
+              <Card key={s.id} hover accent={STATUS_ACCENT[s.status]}
+                className="p-4 pl-5 flex flex-wrap items-center gap-3 cursor-pointer"
+                >
+                <div onClick={() => nav(`/sheet/${s.id}`)}
+                  className="flex flex-wrap items-center gap-3 flex-1 min-w-[140px]">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">
+                    {s.employee_name.split(' ').map((n) => n[0]).join('')}
+                  </div>
+                  <div className="min-w-[140px] flex-1">
+                    <div className="font-bold text-slate-900 truncate">{s.employee_name}</div>
+                    <div className="text-xs text-slate-400 truncate">
+                      {s.department} · {s.goals.length} goals · {s.totalWeightage}% weighted
+                    </div>
                   </div>
                 </div>
-                <Badge color={color}>{text}</Badge>
-                <Button variant="secondary" className="shrink-0"
-                  onClick={() => nav(`/sheet/${s.id}`)}>
+                <Badge color={color} dot>{text}</Badge>
+                <Button variant={s.status === 'submitted' ? 'primary' : 'secondary'}
+                  className="shrink-0" onClick={() => nav(`/sheet/${s.id}`)}>
                   {s.status === 'submitted' ? 'Review' : 'Open'}
+                  <Icon name="arrow" className="w-4 h-4" />
                 </Button>
               </Card>
             );

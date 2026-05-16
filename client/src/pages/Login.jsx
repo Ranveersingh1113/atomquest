@@ -33,7 +33,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-full flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-700">
+    <div className="min-h-screen w-full flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-700">
       <div className="w-full max-w-4xl grid md:grid-cols-2 gap-6">
         <div className="text-white flex flex-col justify-center px-2">
           <div className="flex items-center gap-2 mb-4">
