@@ -9,6 +9,19 @@ const ROLE_META = {
   manager: 'Manager',
   employee: 'Employee',
 };
+// Demo accounts shown for one-click prototype sign-in. The API refreshes this
+// list on load; the fallback guarantees the buttons appear even before/without it.
+const FALLBACK_ACCOUNTS = [
+  { name: 'Priya Sharma', email: 'priya@atomberg.com', role: 'admin' },
+  { name: 'Rahul Verma', email: 'rahul@atomberg.com', role: 'manager' },
+  { name: 'Anjali Mehta', email: 'anjali@atomberg.com', role: 'manager' },
+  { name: 'Karan Singh', email: 'karan@atomberg.com', role: 'employee' },
+  { name: 'Neha Gupta', email: 'neha@atomberg.com', role: 'employee' },
+  { name: 'Amit Patel', email: 'amit@atomberg.com', role: 'employee' },
+  { name: 'Sneha Rao', email: 'sneha@atomberg.com', role: 'employee' },
+  { name: 'Vikram Nair', email: 'vikram@atomberg.com', role: 'employee' },
+];
+
 const TAGS = ['Goal Management', 'Manager Approval', 'Quarterly Check-ins', 'Analytics'];
 const FOOTER = [
   ['3 Roles', 'Employee / Manager / Admin'],
@@ -21,11 +34,15 @@ export default function Login() {
   const nav = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('password');
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useState(FALLBACK_ACCOUNTS);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { api.get('/demo-accounts').then(setAccounts).catch(() => {}); }, []);
+  useEffect(() => {
+    api.get('/demo-accounts')
+      .then((list) => { if (Array.isArray(list) && list.length) setAccounts(list); })
+      .catch(() => {});
+  }, []);
 
   async function submit(e, em = email, pw = password) {
     e?.preventDefault();
@@ -55,7 +72,7 @@ export default function Login() {
           </div>
           <div>
             <div className="text-lg font-bold leading-tight">Atomberg</div>
-            <div className="text-xs text-slate-500">AtomQuest Portal</div>
+            <div className="text-xs text-slate-500">Goal Tracking Portal</div>
           </div>
         </div>
 

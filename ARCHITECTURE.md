@@ -1,4 +1,4 @@
-# AtomQuest — Architecture
+# Atomberg — Architecture
 
 ## System diagram
 

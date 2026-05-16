@@ -1,6 +1,6 @@
-# AtomQuest — Build Progress
+# Atomberg — Build Progress
 
-In-House **Goal Setting & Tracking Portal** for the AtomQuest Hackathon 1.0.
+In-House **Goal Setting & Tracking Portal** for the Atomberg Hackathon 1.0.
 A full performance-cycle portal: goal creation → manager approval → quarterly
 check-ins → reporting, analytics, and governance.
 
@@ -152,5 +152,5 @@ cd client && npm install && npm run dev                 # http://localhost:5173
 ```
 
 **Demo logins** (password `password` for all):
-`priya@atomquest.com` (Admin/HR) · `rahul@atomquest.com` (Manager) ·
-`amit@atomquest.com` (Employee — empty sheet, create goals live).
+`priya@atomberg.com` (Admin/HR) · `rahul@atomberg.com` (Manager) ·
+`amit@atomberg.com` (Employee — empty sheet, create goals live).

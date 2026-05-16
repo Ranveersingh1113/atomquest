@@ -3,9 +3,9 @@ dist/
 *.log
 
 # SQLite database (regenerate with: cd server && npm run seed)
-server/atomquest.db
-server/atomquest.db-shm
-server/atomquest.db-wal
+server/atomberg.db
+server/atomberg.db-shm
+server/atomberg.db-wal
 
 .DS_Store
 .vite/

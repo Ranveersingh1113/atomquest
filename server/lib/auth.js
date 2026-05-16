@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import db from '../db.js';
 
-const SECRET = 'atomquest-demo-secret';
+const SECRET = 'atomberg-demo-secret';
 
 export function signToken(userId) {
   const sig = crypto.createHmac('sha256', SECRET).update(String(userId)).digest('hex');

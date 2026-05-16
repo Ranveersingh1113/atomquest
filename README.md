@@ -1,9 +1,9 @@
-# AtomQuest — Goal Setting & Tracking Portal
+# Atomberg — Goal Setting & Tracking Portal
 
 A web portal for the full employee performance cycle: **goal creation →
 manager approval → quarterly check-ins → reporting, analytics & governance**.
 
-Built for AtomQuest Hackathon 1.0.
+Built for the Atomberg Hackathon 1.0.
 
 ## Stack
 
@@ -18,7 +18,7 @@ Requires **Node.js 24+** (uses the built-in `node:sqlite` module).
 # Terminal 1 — API
 cd server
 npm install
-npm run seed      # creates & seeds atomquest.db
+npm run seed      # creates & seeds atomberg.db
 npm start         # http://localhost:4000
 
 # Terminal 2 — Web app
@@ -35,13 +35,13 @@ Password is `password` for every account.
 
 | Role | Email | Use for |
 |------|-------|---------|
-| Admin / HR | `priya@atomquest.com` | Cycle config, all sheets, escalations, unlock |
-| Manager (L1) | `rahul@atomquest.com` | Approve / return, check-ins, shared goals |
-| Manager (L1) | `anjali@atomquest.com` | Engineering team |
-| Employee | `amit@atomquest.com` | **Empty sheet — create & submit goals live** |
-| Employee | `neha@atomquest.com` | Submitted sheet — awaiting approval |
-| Employee | `karan@atomquest.com` | Approved sheet — log quarterly achievement |
-| Employee | `vikram@atomquest.com` | Returned sheet — rework flow |
+| Admin / HR | `priya@atomberg.com` | Cycle config, all sheets, escalations, unlock |
+| Manager (L1) | `rahul@atomberg.com` | Approve / return, check-ins, shared goals |
+| Manager (L1) | `anjali@atomberg.com` | Engineering team |
+| Employee | `amit@atomberg.com` | **Empty sheet — create & submit goals live** |
+| Employee | `neha@atomberg.com` | Submitted sheet — awaiting approval |
+| Employee | `karan@atomberg.com` | Approved sheet — log quarterly achievement |
+| Employee | `vikram@atomberg.com` | Returned sheet — rework flow |
 
 The login screen also lists every account for one-click demo sign-in.
 

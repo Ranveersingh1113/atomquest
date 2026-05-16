@@ -56,7 +56,7 @@ export default function Layout({ children }) {
   useEffect(() => { api.get('/cycle').then(setCycle).catch(() => {}); }, []);
 
   const routeKey = '/' + (loc.pathname.split('/')[1] || 'dashboard');
-  const pageTitle = ROUTE_TITLE[routeKey] || 'AtomQuest';
+  const pageTitle = ROUTE_TITLE[routeKey] || 'Atomberg';
   const initials = user.name.split(' ').map((n) => n[0]).join('').slice(0, 2);
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -69,7 +69,7 @@ export default function Layout({ children }) {
             <Logo />
             <div>
               <div className="text-white font-bold leading-tight tracking-tight">Atomberg</div>
-              <div className="text-[10.5px] text-slate-500 font-medium tracking-wide">AtomQuest Portal</div>
+              <div className="text-[10.5px] text-slate-500 font-medium tracking-wide">Goal Tracking Portal</div>
             </div>
           </div>
         </div>

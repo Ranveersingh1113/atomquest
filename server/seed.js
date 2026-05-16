@@ -13,16 +13,16 @@ const insUser = db.prepare(
    VALUES (?,?,?,?,?,?,?)`);
 
 // Admin / HR
-const admin = insUser.run('Priya Sharma','priya@atomquest.com',PW,'admin',null,'Human Resources','HR Director').lastInsertRowid;
+const admin = insUser.run('Priya Sharma','priya@atomberg.com',PW,'admin',null,'Human Resources','HR Director').lastInsertRowid;
 // Managers (L1)
-const m1 = insUser.run('Rahul Verma','rahul@atomquest.com',PW,'manager',admin,'Sales','Sales Manager').lastInsertRowid;
-const m2 = insUser.run('Anjali Mehta','anjali@atomquest.com',PW,'manager',admin,'Engineering','Engineering Manager').lastInsertRowid;
+const m1 = insUser.run('Rahul Verma','rahul@atomberg.com',PW,'manager',admin,'Sales','Sales Manager').lastInsertRowid;
+const m2 = insUser.run('Anjali Mehta','anjali@atomberg.com',PW,'manager',admin,'Engineering','Engineering Manager').lastInsertRowid;
 // Employees
-const karan = insUser.run('Karan Singh','karan@atomquest.com',PW,'employee',m1,'Sales','Account Executive').lastInsertRowid;
-const neha  = insUser.run('Neha Gupta','neha@atomquest.com',PW,'employee',m1,'Sales','Sales Associate').lastInsertRowid;
-const amit  = insUser.run('Amit Patel','amit@atomquest.com',PW,'employee',m1,'Sales','Sales Associate').lastInsertRowid;
-const sneha = insUser.run('Sneha Rao','sneha@atomquest.com',PW,'employee',m2,'Engineering','Software Engineer').lastInsertRowid;
-const vikram= insUser.run('Vikram Nair','vikram@atomquest.com',PW,'employee',m2,'Engineering','Software Engineer').lastInsertRowid;
+const karan = insUser.run('Karan Singh','karan@atomberg.com',PW,'employee',m1,'Sales','Account Executive').lastInsertRowid;
+const neha  = insUser.run('Neha Gupta','neha@atomberg.com',PW,'employee',m1,'Sales','Sales Associate').lastInsertRowid;
+const amit  = insUser.run('Amit Patel','amit@atomberg.com',PW,'employee',m1,'Sales','Sales Associate').lastInsertRowid;
+const sneha = insUser.run('Sneha Rao','sneha@atomberg.com',PW,'employee',m2,'Engineering','Software Engineer').lastInsertRowid;
+const vikram= insUser.run('Vikram Nair','vikram@atomberg.com',PW,'employee',m2,'Engineering','Software Engineer').lastInsertRowid;
 
 // Cycle — FY 2025-26. Windows backdated so all quarters are open for full demo.
 const cycle = db.prepare(
@@ -105,7 +105,7 @@ insGoal.run(vs,ta['Operational Excellence'],'Improve test coverage',
 
 console.log('Seed complete.');
 console.log('Logins (password = "password"):');
-console.log('  Admin/HR   : priya@atomquest.com');
-console.log('  Manager L1 : rahul@atomquest.com, anjali@atomquest.com');
-console.log('  Employee   : karan@, neha@, amit@, sneha@, vikram@ atomquest.com');
+console.log('  Admin/HR   : priya@atomberg.com');
+console.log('  Manager L1 : rahul@atomberg.com, anjali@atomberg.com');
+console.log('  Employee   : karan@, neha@, amit@, sneha@, vikram@ atomberg.com');
 db.close();
