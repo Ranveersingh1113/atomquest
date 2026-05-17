@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
+import { maybeAutoStartTour } from '../tour.js';
 import {
   Card, Stat, Badge, Banner, Spinner, Button, Ring, Icon, ProgressBar,
   sheetStatusBadge,
@@ -16,6 +17,9 @@ export default function Dashboard() {
   useEffect(() => {
     Promise.all([api.get('/sheets'), api.get('/cycle')]).then(([s, c]) => { setSheets(s); setCycle(c); });
   }, []);
+  useEffect(() => {
+    if (sheets && cycle) maybeAutoStartTour(user, nav);
+  }, [sheets, cycle]);
   if (!sheets || !cycle) return <Spinner />;
 
   const latestQ = cycle.openQuarters?.[cycle.openQuarters.length - 1] || 'Q1';
@@ -31,7 +35,7 @@ export default function Dashboard() {
 
 function Hero({ user, cycle, children }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950 p-6 text-white aq-fade">
+    <div data-tour="hero" className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950 p-6 text-white aq-fade">
       <div className="absolute -right-16 -top-28 w-80 h-80 rounded-full bg-brand-500/20 blur-3xl aq-glow" />
       <div className="absolute right-28 -bottom-20 w-48 h-48 rounded-full bg-brand-500/10 blur-2xl" />
       <div className="relative flex flex-wrap items-center justify-between gap-4">
@@ -78,7 +82,7 @@ function EmployeeView({ sheet, latestQ, cycle, user, nav }) {
         <HeroRing value={score} caption={`${latestQ} weighted progress`} />
       </Hero>
 
-      <div className="grid sm:grid-cols-3 gap-3">
+      <div data-tour="stats" className="grid sm:grid-cols-3 gap-3">
         <Stat label="Goal Sheet" value={text} icon="doc"
           tone={sheet.status === 'approved' ? 'emerald' : sheet.status === 'returned' ? 'amber' : 'brand'} />
         <Stat label="Goals Defined" value={`${sheet.goals.length} / 8`}
@@ -97,9 +101,11 @@ function EmployeeView({ sheet, latestQ, cycle, user, nav }) {
         <Banner tone="success">Goals approved &amp; locked. Keep your quarterly achievement up to date.</Banner>
       )}
 
-      <ActionCard icon="target" title="Manage your goal sheet"
-        text="Create goals, track quarterly achievement, and view your scores."
-        cta="Open My Goal Sheet" onClick={() => nav('/my-goals')} />
+      <div data-tour="primary-action">
+        <ActionCard icon="target" title="Manage your goal sheet"
+          text="Create goals, track quarterly achievement, and view your scores."
+          cta="Open My Goal Sheet" onClick={() => nav('/my-goals')} />
+      </div>
     </>
   );
 }
@@ -117,7 +123,7 @@ function ManagerView({ sheets, latestQ, cycle, user, nav }) {
         <HeroRing value={avg} caption={`Team avg ${latestQ} progress`} />
       </Hero>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div data-tour="stats" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat label="Team Members" value={sheets.length} icon="users" tone="sky" />
         <Stat label="Pending Review" value={pending.length} icon="clock"
           tone={pending.length ? 'amber' : 'slate'} />
@@ -147,9 +153,11 @@ function ManagerView({ sheets, latestQ, cycle, user, nav }) {
         </Card>
       )}
 
-      <ActionCard icon="users" title="Your team"
-        text="Approvals, quarterly check-ins, and progress for your direct reports."
-        cta="Open My Team" onClick={() => nav('/team')} />
+      <div data-tour="primary-action">
+        <ActionCard icon="users" title="Your team"
+          text="Approvals, quarterly check-ins, and progress for your direct reports."
+          cta="Open My Team" onClick={() => nav('/team')} />
+      </div>
     </>
   );
 }
@@ -165,7 +173,7 @@ function AdminView({ sheets, cycle, latestQ, user, nav }) {
         <HeroRing value={completion} caption="Goal-setting completion" />
       </Hero>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div data-tour="stats" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat label="Goal Sheets" value={sheets.length} icon="layers" tone="sky" />
         <Stat label="Pending Approval" value={byStatus('submitted')} icon="clock"
           tone={byStatus('submitted') ? 'amber' : 'slate'} />
@@ -184,7 +192,7 @@ function AdminView({ sheets, cycle, latestQ, user, nav }) {
         </div>
       </Card>
 
-      <div className="grid sm:grid-cols-3 gap-3">
+      <div data-tour="primary-action" className="grid sm:grid-cols-3 gap-3">
         <ActionCard compact icon="calendar" title="Cycle" text="Configure windows."
           cta="Manage Cycle" onClick={() => nav('/cycle')} />
         <ActionCard compact icon="doc" title="Reports" text="Export & completion."

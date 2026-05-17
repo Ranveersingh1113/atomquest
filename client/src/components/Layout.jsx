@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { api } from '../api.js';
 import { Icon } from '../ui.jsx';
+import { startTour, isPortalAccount } from '../tour.js';
 
 const NAV = {
   employee: [
@@ -41,11 +42,7 @@ const ROUTE_TITLE = {
 };
 
 function Logo() {
-  return (
-    <div className="w-10 h-10 rounded-xl bg-brand-500 grid place-items-center shadow-lg shadow-brand-500/20">
-      <Icon name="bolt" className="w-5 h-5 text-ink-950" />
-    </div>
-  );
+  return <img src="/logo.png" alt="Atomberg" className="w-10 h-10 rounded-xl" />;
 }
 
 export default function Layout({ children }) {
@@ -79,7 +76,7 @@ export default function Layout({ children }) {
         <div className="px-5 pt-5 pb-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
           Navigation
         </div>
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+        <nav data-tour="sidebar" className="flex-1 px-3 space-y-1 overflow-y-auto">
           {items.map(([to, label, icon]) => (
             <NavLink key={to} to={to}
               className={({ isActive }) =>
@@ -119,6 +116,11 @@ export default function Layout({ children }) {
         <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200/80 px-5 sm:px-7 h-14 flex items-center justify-between">
           <div className="font-bold text-slate-800 text-[15px] tracking-tight truncate">{pageTitle}</div>
           <div className="flex items-center gap-2.5 shrink-0">
+            <button onClick={() => startTour(user.role, { extensive: isPortalAccount(user), navigate: nav })}
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 px-2.5 py-1 text-xs font-bold hover:bg-slate-200 hover:text-slate-800 transition-colors">
+              <Icon name="spark" className="w-3.5 h-3.5" />
+              Take a tour
+            </button>
             {cycle && (
               <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200 px-2.5 py-1 text-xs font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
@@ -129,7 +131,7 @@ export default function Layout({ children }) {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-6xl mx-auto px-5 sm:px-7 py-7">{children}</div>
+          <div data-tour="page" className="max-w-6xl mx-auto px-5 sm:px-7 py-7">{children}</div>
         </main>
       </div>
     </div>

@@ -14,7 +14,7 @@ export function verifyToken(token) {
   if (!id || !sig) return null;
   const expected = crypto.createHmac('sha256', SECRET).update(id).digest('hex');
   if (sig !== expected) return null;
-  return db.prepare('SELECT id,name,email,role,manager_id,department,title FROM users WHERE id=?').get(Number(id)) || null;
+  return db.prepare('SELECT id,name,email,role,manager_id,department,title,auth_provider FROM users WHERE id=?').get(Number(id)) || null;
 }
 
 export function requireAuth(req, res, next) {
