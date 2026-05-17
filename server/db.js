@@ -104,7 +104,30 @@ CREATE TABLE IF NOT EXISTS escalations (
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','resolved')),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL,
+  event TEXT NOT NULL,
+  recipient TEXT,
+  subject TEXT,
+  body TEXT,
+  link TEXT,
+  status TEXT NOT NULL,
+  error TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `);
+
+// SSO-provisioned users carry no local password.
+try { db.exec("ALTER TABLE users ADD COLUMN auth_provider TEXT NOT NULL DEFAULT 'local'"); } catch {}
+try { db.exec('ALTER TABLE users ADD COLUMN entra_oid TEXT'); } catch {}
 
 // node:sqlite has no .transaction(); provide a simple wrapper.
 export function tx(fn) {

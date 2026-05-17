@@ -30,18 +30,37 @@ const FOOTER = [
 ];
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, loginWithToken } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('password');
   const [accounts, setAccounts] = useState(FALLBACK_ACCOUNTS);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [ssoEnabled, setSsoEnabled] = useState(false);
 
   useEffect(() => {
     api.get('/demo-accounts')
       .then((list) => { if (Array.isArray(list) && list.length) setAccounts(list); })
       .catch(() => {});
+    api.get('/auth/sso/status')
+      .then((s) => setSsoEnabled(!!s?.enabled))
+      .catch(() => {});
+
+    // Handle the Entra ID SSO redirect back to the app.
+    const params = new URLSearchParams(window.location.search);
+    const ssoToken = params.get('sso_token');
+    const ssoError = params.get('sso_error');
+    if (ssoError) {
+      setError(`Microsoft sign-in failed: ${ssoError}`);
+      window.history.replaceState({}, '', '/login');
+    } else if (ssoToken) {
+      setBusy(true);
+      loginWithToken(ssoToken)
+        .then(() => nav('/dashboard'))
+        .catch((e) => { setError(e.message); setBusy(false); });
+      window.history.replaceState({}, '', '/login');
+    }
   }, []);
 
   async function submit(e, em = email, pw = password) {
@@ -136,6 +155,26 @@ export default function Login() {
               {busy ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
+
+          {ssoEnabled && (
+            <div className="mt-5">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px flex-1 bg-slate-200" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">or</span>
+                <span className="h-px flex-1 bg-slate-200" />
+              </div>
+              <button type="button" onClick={() => { window.location.href = '/api/auth/sso/login'; }}
+                className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                <svg viewBox="0 0 23 23" className="w-4 h-4" aria-hidden="true">
+                  <path fill="#f25022" d="M1 1h10v10H1z" />
+                  <path fill="#7fba00" d="M12 1h10v10H12z" />
+                  <path fill="#00a4ef" d="M1 12h10v10H1z" />
+                  <path fill="#ffb900" d="M12 12h10v10H12z" />
+                </svg>
+                Sign in with Microsoft
+              </button>
+            </div>
+          )}
 
           <div className="mt-6 pt-5 border-t border-slate-100">
             <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-2.5">

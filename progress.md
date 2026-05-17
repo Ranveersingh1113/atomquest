@@ -141,6 +141,71 @@ run raises and lists items, RBAC blocks non-admins.
 
 ---
 
+## Phase 6 — Full Dry Run & Production Hardening  ✅
+
+**What:** End-to-end test of every flow, plus production-readiness changes.
+
+- **Automated dry run** (`server/dryrun.mjs`) — 34-check end-to-end script hitting
+  the live API: auth (all roles + rejection), goal creation, all validation rules
+  (=100 %, ≥10 %, ≤8), submit/return/approve/lock, RBAC (self-approve, wrong
+  manager, locked-edit, cross-employee, non-admin guards), achievement scoring
+  (verified `1M/2M = 0.5`), manager check-ins, shared goals, CSV export,
+  completion dashboard, audit trail, admin unlock, analytics, escalations,
+  cycle config. **Result: 34 / 34 passed.**
+- **Browser smoke test** — all 3 roles log in; role-scoped navigation renders
+  correctly (Employee / Manager / Admin); no console errors on any page.
+- **Single-process production hosting** — Express now serves the built SPA
+  (`client/dist`) with a history-API fallback. The whole portal runs as **one
+  Node process** in production (`npm run build` + `npm start`) — lower cost,
+  simpler hosting.
+- **Bundle code-split** — Analytics (Recharts) is lazy-loaded. Initial JS bundle
+  dropped **644 kB → 230 kB** (gzip 183 kB → 71 kB); Recharts loads on demand.
+- **Hardening** — `AUTH_SECRET` / `PORT` read from env, JSON body capped at
+  256 kB, unknown `/api/*` routes return a clean JSON 404.
+
+**Dry run result:** 61 / 61 checks passed (later expanded — see Phase 7).
+
+---
+
+## Phase 7 — Bonus Integrations: Entra ID SSO + Email & Teams  ✅
+
+**What:** The two remaining Section 5 bonus features, built as real integrations.
+
+- **5.1 Microsoft Entra ID SSO** (`server/routes/sso.js`) — OAuth2
+  authorization-code flow via MSAL. "Sign in with Microsoft" on the login screen.
+  On callback the portal reads the Graph profile, derives the portal **role from
+  AAD security-group membership**, **syncs the reporting line** from the Graph
+  `manager` relationship, provisions/updates the local user, and issues a portal
+  session token. New `users.auth_provider` / `users.entra_oid` columns.
+- **5.2 Email & Teams** (`server/lib/integrations.js`, `notify.js`) — event-driven
+  notifications on **goal submission, approval, rejection, and check-in
+  reminders**. Email via SMTP (nodemailer); Teams via a webhook card with a
+  **deep link** straight to the goal sheet. Every dispatch is recorded in a new
+  `notifications` table.
+- **In-app Teams setup** (`/settings` — Integrations) — an organisation connects
+  its own Teams channel from the admin UI: paste the webhook URL, pick the
+  webhook type (**Power Automate Workflows** → Adaptive Card, or classic
+  **Incoming Webhook** → MessageCard), and send a test card. Stored in a
+  `settings` table — no redeploy, no env edit.
+- **Admin Notifications page** (`/notifications`) — integration-status panel,
+  one-click "Send Check-in Reminders", and the full dispatch log.
+- **Config** — Teams is configured in-app; email & Entra (which hold secrets) are
+  env-driven (`server/.env.example`, auto-loaded from `server/.env`). With
+  nothing set, the portal runs on local auth and records dispatches as
+  `skipped` — no crashes, no external calls.
+
+> Real integrations only — supply Azure / SMTP / Teams credentials in
+> `server/.env` to light them up. Code paths are genuine MSAL / nodemailer /
+> webhook calls, not stubs.
+
+**Tested:** dry run expanded to **78 / 78 checks** — adds full UoM scoring,
+max-8 enforcement, shared-goal sync, closed-window blocking, notification
+fan-out (email + Teams, deep links), reminder dispatch, in-app Teams settings
+(save / persist / validate / test / disconnect), RBAC on every new route, and
+SSO endpoint behaviour (live redirect to Microsoft once Entra is configured).
+
+---
+
 ## How to run
 
 ```bash

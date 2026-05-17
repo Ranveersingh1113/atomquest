@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import db from '../db.js';
 
-const SECRET = 'atomberg-demo-secret';
+const SECRET = process.env.AUTH_SECRET || 'atomberg-demo-secret';
 
 export function signToken(userId) {
   const sig = crypto.createHmac('sha256', SECRET).update(String(userId)).digest('hex');

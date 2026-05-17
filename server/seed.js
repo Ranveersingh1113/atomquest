@@ -4,6 +4,7 @@ import db from './db.js';
 db.exec(`DELETE FROM escalations; DELETE FROM audit_log; DELETE FROM checkins;
   DELETE FROM achievements; DELETE FROM goals; DELETE FROM goal_sheets;
   DELETE FROM thrust_areas; DELETE FROM cycles; DELETE FROM users;
+  DELETE FROM notifications;
   DELETE FROM sqlite_sequence;`);
 
 const PW = 'password';

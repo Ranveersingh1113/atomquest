@@ -16,6 +16,8 @@ const ICON_PATHS = {
   bolt: 'M13 2L3 14h7l-1 8 10-12h-7l1-8z',
   calendar: 'M3 5h18v16H3V5zM3 9h18M8 3v4M16 3v4',
   arrow: 'M5 12h14M13 5l7 7-7 7',
+  bell: 'M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0',
+  sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',
 };
 export function Icon({ name, className = 'w-5 h-5' }) {
   return (

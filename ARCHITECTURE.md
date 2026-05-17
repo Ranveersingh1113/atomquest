@@ -49,6 +49,20 @@ Every call ──► Authorization: Bearer <token> ──► requireAuth ──�
   an in-house portal; if multi-writer scale is ever needed, the data layer
   (`server/lib`) is isolated so SQLite → Postgres is a contained swap.
 
+## External integrations (optional, env-driven)
+
+| Integration | Mechanism | Activates when |
+|-------------|-----------|----------------|
+| **Microsoft Entra ID SSO** | OAuth2 auth-code flow (MSAL); Graph for profile, group→role, manager→hierarchy | `AZURE_*` env vars set |
+| **Email** | SMTP via nodemailer — submission / approval / rejection / reminder events | `SMTP_*` env vars set |
+| **Microsoft Teams** | Webhook card (Workflows Adaptive Card / connector MessageCard) with a deep link | configured in-app — Admin → Integrations |
+
+Teams is set up by the organisation from the admin UI (`settings` table); email
+and Entra hold secrets so they are env-driven. All three are pure add-ons:
+unconfigured, the portal runs on local HMAC auth and records notification
+dispatches as `skipped`. No external service is required to run or demo the core
+portal — keeping the cost floor at zero.
+
 ## Security & governance
 
 - Role-based access control on every mutating route (`requireRole`).

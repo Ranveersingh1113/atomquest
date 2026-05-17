@@ -26,7 +26,9 @@ const NAV = {
     ['/reports', 'Reports', 'doc'],
     ['/analytics', 'Analytics', 'spark'],
     ['/escalations', 'Escalations', 'alert'],
+    ['/notifications', 'Notifications', 'bell'],
     ['/cycle', 'Cycle Admin', 'calendar'],
+    ['/settings', 'Integrations', 'sliders'],
     ['/audit', 'Audit Trail', 'lock'],
   ],
 };
@@ -35,7 +37,7 @@ const ROUTE_TITLE = {
   '/dashboard': 'Dashboard', '/my-goals': 'My Goal Sheet', '/team': 'Goal Sheets',
   '/shared-goals': 'Shared Goals', '/reports': 'Reports & Governance', '/analytics': 'Analytics',
   '/audit': 'Audit Trail', '/escalations': 'Escalations', '/cycle': 'Cycle Administration',
-  '/sheet': 'Goal Sheet',
+  '/notifications': 'Notifications', '/settings': 'Integrations', '/sheet': 'Goal Sheet',
 };
 
 function Logo() {

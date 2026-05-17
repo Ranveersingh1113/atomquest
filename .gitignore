@@ -2,6 +2,10 @@ node_modules/
 dist/
 *.log
 
+# Local environment / secrets
+.env
+server/.env
+
 # SQLite database (regenerate with: cd server && npm run seed)
 server/atomberg.db
 server/atomberg.db-shm

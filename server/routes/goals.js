@@ -3,6 +3,7 @@ import db, { tx } from '../db.js';
 import { requireAuth, requireRole } from '../lib/auth.js';
 import { audit } from '../lib/audit.js';
 import { getSheetDetail, getActiveCycle, QUARTERS } from '../lib/sheets.js';
+import { onGoalSubmitted, onGoalApproved, onGoalReturned } from '../lib/notify.js';
 
 const r = Router();
 r.use(requireAuth);
@@ -61,13 +62,15 @@ function validateGoalInput(g) {
   if (!g.thrust_area_id) return 'Thrust area is required';
   if (!['numeric_min', 'numeric_max', 'percent', 'timeline', 'zero'].includes(g.uom_type))
     return 'Invalid Unit of Measurement';
-  if (g.weightage == null || g.weightage < MIN_WEIGHTAGE)
+  const w = Number(g.weightage);
+  if (!Number.isFinite(w) || w < MIN_WEIGHTAGE)
     return `Minimum weightage per goal is ${MIN_WEIGHTAGE}%`;
-  if (g.weightage > 100) return 'Weightage cannot exceed 100%';
+  if (w > 100) return 'Weightage cannot exceed 100%';
   if (g.uom_type === 'timeline') {
     if (!g.target_date) return 'Timeline goals require a target date';
   } else if (g.uom_type !== 'zero') {
     if (g.target == null || g.target === '') return 'Target value is required';
+    if (!Number.isFinite(Number(g.target))) return 'Target must be a numeric value';
   }
   return null;
 }
@@ -121,7 +124,7 @@ r.put('/goals/:id', (req, res) => {
   const body = req.body || {};
   const merged = { ...goal };
   for (const f of allowed) if (f in body) merged[f] = body[f];
-  if (isAdmin || (isOwner && !goal.shared_origin_id)) {
+  if (isAdmin || isManager || (isOwner && !goal.shared_origin_id)) {
     const err = validateGoalInput(merged);
     if (err) return res.status(400).json({ error: err });
   }
@@ -176,6 +179,7 @@ r.post('/sheets/:id/submit', (req, res) => {
   db.prepare(`UPDATE goal_sheets SET status='submitted', return_comment=NULL,
               submitted_at=datetime('now') WHERE id=?`).run(sheet.id);
   audit('goal_sheet', sheet.id, req.user.id, 'submitted');
+  onGoalSubmitted(sheet.id);
   res.json(getSheetDetail(sheet.id));
 });
 
@@ -198,6 +202,7 @@ r.post('/sheets/:id/approve', (req, res) => {
   db.prepare(`UPDATE goal_sheets SET status='approved', locked=1,
               approved_at=datetime('now') WHERE id=?`).run(sheet.id);
   audit('goal_sheet', sheet.id, req.user.id, 'approved & locked');
+  onGoalApproved(sheet.id);
   res.json(getSheetDetail(sheet.id));
 });
 
@@ -212,6 +217,7 @@ r.post('/sheets/:id/return', (req, res) => {
   db.prepare("UPDATE goal_sheets SET status='returned', return_comment=? WHERE id=?")
     .run(comment, sheet.id);
   audit('goal_sheet', sheet.id, req.user.id, 'returned for rework', null, null, comment);
+  onGoalReturned(sheet.id, comment);
   res.json(getSheetDetail(sheet.id));
 });
 
@@ -222,6 +228,10 @@ r.post('/shared-goals', requireRole('manager', 'admin'), (req, res) => {
   if (!recipientIds.length) return res.status(400).json({ error: 'Select at least one recipient' });
   const err = validateGoalInput(g);
   if (err) return res.status(400).json({ error: err });
+  const invalidRecipients = recipientIds.filter(id =>
+    !db.prepare("SELECT id FROM users WHERE id=? AND role='employee'").get(id));
+  if (invalidRecipients.length)
+    return res.status(400).json({ error: `Invalid recipient id(s): ${invalidRecipients.join(', ')}` });
   const cycle = getActiveCycle();
   const defaultWeight = Number(g.weightage);
 

@@ -20,13 +20,19 @@ export function AuthProvider({ children }) {
     setToken(token);
     setUser(user);
   }
+  // Used by the Entra ID SSO callback — a portal token is already minted.
+  async function loginWithToken(token) {
+    setToken(token);
+    const u = await api.get('/me');
+    setUser(u);
+  }
   function logout() {
     setToken(null);
     setUser(null);
   }
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, logout }}>
+    <AuthCtx.Provider value={{ user, loading, login, logout, loginWithToken }}>
       {children}
     </AuthCtx.Provider>
   );

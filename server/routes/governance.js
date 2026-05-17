@@ -4,6 +4,10 @@ import { requireAuth, requireRole } from '../lib/auth.js';
 import { audit } from '../lib/audit.js';
 import { getSheetDetail, getActiveCycle, openQuarters, QUARTERS } from '../lib/sheets.js';
 import { goalScore } from '../lib/scoring.js';
+import { onCheckinReminder } from '../lib/notify.js';
+import { entraConfigured, smtpConfigured } from '../lib/config.js';
+import { teamsConfigured, teamsTarget, sendTeams } from '../lib/integrations.js';
+import { getSetting, setSetting } from '../lib/settings.js';
 
 const r = Router();
 r.use(requireAuth);
@@ -230,7 +234,7 @@ function evaluateEscalations() {
 }
 function escLevel(d) { return d <= 14 ? 'L1 - Employee' : d <= 28 ? 'L2 - Manager' : 'L3 - HR'; }
 
-r.get('/escalations', (req, res) => {
+r.get('/escalations', requireRole('admin'), (req, res) => {
   res.json(db.prepare(`SELECT e.*, u.name AS employee FROM escalations e
     JOIN users u ON u.id=e.employee_id ORDER BY e.id DESC`).all());
 });
@@ -250,6 +254,81 @@ r.put('/escalations/:id/resolve', requireRole('admin'), (req, res) => {
   db.prepare("UPDATE escalations SET status='resolved' WHERE id=?").run(Number(req.params.id));
   audit('escalation', Number(req.params.id), req.user.id, 'escalation resolved');
   res.json({ ok: true });
+});
+
+// --- Notification log (every email / Teams dispatch is recorded here) ---
+r.get('/notifications', requireRole('admin'), (_req, res) => {
+  res.json(db.prepare('SELECT * FROM notifications ORDER BY id DESC LIMIT 200').all());
+});
+
+// --- Which external integrations are configured on the server ---
+r.get('/integrations/status', requireRole('admin'), (_req, res) => {
+  res.json({
+    entra: entraConfigured(),
+    smtp: smtpConfigured(),
+    teams: teamsConfigured(),
+  });
+});
+
+// --- Admin-managed integration settings (Teams webhook is configured in-app) ---
+r.get('/settings/integrations', requireRole('admin'), (_req, res) => {
+  const { url, kind } = teamsTarget();
+  res.json({
+    teams: { webhookUrl: url, kind, configured: !!url },
+    smtp: { configured: smtpConfigured() },
+    entra: { configured: entraConfigured() },
+  });
+});
+
+r.put('/settings/integrations', requireRole('admin'), (req, res) => {
+  const { teams_webhook_url, teams_webhook_kind } = req.body || {};
+  if (teams_webhook_url !== undefined) {
+    const url = String(teams_webhook_url).trim();
+    if (url && !/^https:\/\//i.test(url))
+      return res.status(400).json({ error: 'Teams webhook URL must be a valid https:// URL' });
+    setSetting('teams_webhook_url', url);
+  }
+  if (teams_webhook_kind !== undefined) {
+    const kind = String(teams_webhook_kind);
+    if (!['workflow', 'connector'].includes(kind))
+      return res.status(400).json({ error: 'Webhook kind must be "workflow" or "connector"' });
+    setSetting('teams_webhook_kind', kind);
+  }
+  audit('settings', 0, req.user.id, 'integration settings updated', 'teams_webhook', null,
+    getSetting('teams_webhook_url') ? 'configured' : 'cleared');
+  const { url, kind } = teamsTarget();
+  res.json({ teams: { webhookUrl: url, kind, configured: !!url } });
+});
+
+// --- Send a test card to the configured Teams webhook ---
+r.post('/settings/integrations/test-teams', requireRole('admin'), async (req, res) => {
+  if (!teamsConfigured())
+    return res.status(400).json({ error: 'No Teams webhook configured' });
+  const result = await sendTeams({
+    event: 'test',
+    title: 'Atomberg Portal — test notification',
+    text: `Teams integration is connected. Triggered by ${req.user.name}.`,
+    link: `${process.env.APP_BASE_URL || 'http://localhost:5173'}/dashboard`,
+    linkLabel: 'Open Atomberg',
+  });
+  if (result.ok) return res.json({ ok: true });
+  res.status(502).json({ error: result.error || 'Teams webhook delivery failed' });
+});
+
+// --- Admin: send quarterly check-in reminders for the latest open window ---
+r.post('/reminders/run', requireRole('admin'), (req, res) => {
+  const cycle = getActiveCycle();
+  const open = openQuarters(cycle);
+  const q = open[open.length - 1];
+  if (!q) return res.json({ quarter: null, sent: 0 });
+  const sheets = db.prepare("SELECT id FROM goal_sheets WHERE status='approved'").all();
+  let sent = 0;
+  for (const { id } of sheets) {
+    const done = db.prepare('SELECT id FROM checkins WHERE sheet_id=? AND quarter=?').get(id, q);
+    if (!done) { onCheckinReminder(id, q); sent++; }
+  }
+  audit('notification', 0, req.user.id, 'check-in reminders sent', q, null, String(sent));
+  res.json({ quarter: q, sent });
 });
 
 export default r;
