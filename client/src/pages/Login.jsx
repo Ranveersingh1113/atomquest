@@ -181,8 +181,9 @@ export default function Login() {
                   Continue with Microsoft
                 </button>
 
-                {/* Hover card — the three Entra ID demo accounts */}
-                <div className="absolute bottom-full left-0 right-0 mb-2 z-30 origin-bottom
+                {/* Hover card — the three Entra ID demo accounts.
+                    Wider than the button so the full email addresses fit. */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-[360px] max-w-[92vw] mb-2 z-30 origin-bottom
                   opacity-0 invisible translate-y-1 transition-all duration-150
                   group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
                   <div className="rounded-xl border border-paper-200 bg-white p-3 shadow-[0_18px_50px_-16px_rgba(0,0,0,0.30)]">
@@ -194,7 +195,7 @@ export default function Login() {
                         <div key={a.email} className="flex items-center justify-between gap-2 rounded-md bg-paper-50 px-2 py-1.5">
                           <span className="min-w-0">
                             <span className="block text-[11.5px] font-semibold text-slate-800">{a.name}</span>
-                            <span className="block text-[10.5px] text-slate-400 truncate">{a.email}</span>
+                            <span className="block text-[10.5px] text-slate-400 whitespace-nowrap">{a.email}</span>
                           </span>
                           <span className="shrink-0 text-[9.5px] font-bold text-brand-700 bg-brand-50 ring-1 ring-inset ring-brand-200 rounded px-1.5 py-0.5 uppercase tracking-wide">
                             {ROLE_META[a.role]}

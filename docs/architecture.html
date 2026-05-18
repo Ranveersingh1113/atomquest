@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AtomQuest — Architecture Overview</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222636;
+      --border: #2e3247;
+      --accent: #6c63ff;
+      --accent2: #38bdf8;
+      --accent3: #34d399;
+      --accent4: #f97316;
+      --accent5: #f472b6;
+      --text: #e2e8f0;
+      --muted: #7c87a0;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* ── HERO ── */
+    header {
+      text-align: center;
+      padding: 64px 24px 48px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, #1e1a4a 0%, var(--bg) 70%);
+      border-bottom: 1px solid var(--border);
+    }
+    header .badge {
+      display: inline-block;
+      background: #1e1a4a;
+      border: 1px solid var(--accent);
+      color: #a78bfa;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: 10px;
+      font-size: 16px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── LAYOUT ── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    section {
+      margin-bottom: 60px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .num {
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .card-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .card-grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+    .card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .card .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 10px;
+      margin-right: 4px;
+    }
+
+    /* ── ARCH DIAGRAM ── */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      overflow-x: auto;
+    }
+    .arch-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      margin-bottom: 0;
+    }
+    .arch-box {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      text-align: center;
+      min-width: 130px;
+      flex-shrink: 0;
+    }
+    .arch-box .icon { font-size: 26px; margin-bottom: 6px; }
+    .arch-box .label { font-size: 13px; font-weight: 700; color: #fff; }
+    .arch-box .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .arch-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+    .arch-arrow .line {
+      width: 36px;
+      height: 2px;
+      background: var(--border);
+      position: relative;
+    }
+    .arch-arrow .line::after {
+      content: '';
+      position: absolute;
+      right: -1px; top: -4px;
+      border: 5px solid transparent;
+      border-left-color: var(--border);
+    }
+    .arch-arrow .note {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      white-space: nowrap;
+    }
+
+    .arch-vertical {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .arch-down {
+      width: 2px;
+      height: 28px;
+      background: var(--border);
+      position: relative;
+      margin: 0 auto;
+    }
+    .arch-down::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: -4px;
+      border: 5px solid transparent;
+      border-top-color: var(--border);
+    }
+
+    /* colour accent borders */
+    .border-purple { border-color: var(--accent) !important; }
+    .border-blue   { border-color: var(--accent2) !important; }
+    .border-green  { border-color: var(--accent3) !important; }
+    .border-orange { border-color: var(--accent4) !important; }
+    .border-pink   { border-color: var(--accent5) !important; }
+
+    /* tag colours */
+    .t-purple { background: #2d1f6e; color: #a78bfa; }
+    .t-blue   { background: #0c2d3f; color: var(--accent2); }
+    .t-green  { background: #0d2d22; color: var(--accent3); }
+    .t-orange { background: #2d1800; color: var(--accent4); }
+    .t-pink   { background: #2d0f22; color: var(--accent5); }
+
+    /* ── FLOW STEPS ── */
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex: 1 1 240px;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .flow-step:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .flow-step:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+    @media (max-width: 700px) {
+      .flow-step:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+      .flow-step:last-child  { border-radius: 0 0 var(--radius) var(--radius); }
+    }
+    .flow-step + .flow-step {
+      border-left: none;
+    }
+    @media (max-width: 700px) {
+      .flow-step + .flow-step { border-left: 1px solid var(--border); border-top: none; }
+    }
+    .step-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .flow-step h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .flow-step p  { font-size: 12px; color: var(--muted); }
+
+    /* ── DECISION TABLE ── */
+    .decision-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .decision-table th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .decision-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .decision-table tr:last-child td { border-bottom: none; }
+    .decision-table .tech { font-weight: 700; color: #fff; }
+    .decision-table .reason { color: var(--muted); }
+    .decision-table .alt { color: #4a5568; font-style: italic; }
+
+    /* ── DB SCHEMA SNIPPET ── */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .schema-table {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 12px;
+    }
+    .schema-table .table-header {
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: 12px;
+      color: #fff;
+    }
+    .schema-table .field {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 12px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .schema-table .field .fname { color: var(--text); }
+    .schema-table .field .ftype { color: var(--muted); font-style: italic; }
+
+    /* ── ROLE MATRIX ── */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .role-card .role-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .role-card ul { list-style: none; padding: 0; }
+    .role-card ul li {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .role-card ul li:last-child { border-bottom: none; }
+    .role-card ul li::before {
+      content: '✓';
+      color: var(--accent3);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* ── HOSTING CALLOUT ── */
+    .hosting-banner {
+      background: linear-gradient(135deg, #1a1330 0%, #0f1f2e 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent3);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .hosting-banner .icon { font-size: 36px; flex-shrink: 0; }
+    .hosting-banner h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .hosting-banner p  { font-size: 13px; color: var(--muted); }
+
+    .hosting-specs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .spec-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .spec-item .spec-val { font-size: 22px; font-weight: 800; color: var(--accent3); }
+    .spec-item .spec-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ HERO ═══════════ -->
+<header>
+  <div class="badge">AtomQuest Hackathon 1.0</div>
+  <h1>Project Architecture</h1>
+  <p>A full-stack employee performance management portal — built for zero infrastructure cost.</p>
+</header>
+
+<main>
+
+  <!-- ═══════════ 1. SYSTEM DIAGRAM ═══════════ -->
+  <section>
+    <h2><span class="num">1</span> System Architecture</h2>
+
+    <div class="arch-diagram">
+
+      <!-- Browser -->
+      <div style="display:flex; justify-content:center; margin-bottom:0;">
+        <div class="arch-box border-blue" style="min-width:200px;">
+          <div class="icon">🌐</div>
+          <div class="label">Browser</div>
+          <div class="sub">User (Employee / Manager / Admin)</div>
+        </div>
+      </div>
+
+      <div class="arch-down" style="margin:0 auto;"></div>
+
+      <!-- Frontend -->
+      <div style="display:flex; justify-content:center; margin-bottom:0;">
+        <div class="arch-box border-purple" style="min-width:280px;">
+          <div class="icon">⚛️</div>
+          <div class="label">React Frontend</div>
+          <div class="sub">Vite · Tailwind CSS · Recharts</div>
+          <div class="sub" style="margin-top:4px; color:#7c87a0;">Served on :5173 (dev) or static build</div>
+        </div>
+      </div>
+
+      <div class="arch-down" style="margin:0 auto;"></div>
+
+      <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:0;">
+        HTTP/REST · JSON · Bearer Token
+      </div>
+
+      <div class="arch-down" style="margin:0 auto;"></div>
+
+      <!-- API -->
+      <div style="display:flex; justify-content:center; margin-bottom:0;">
+        <div class="arch-box border-orange" style="min-width:280px;">
+          <div class="icon">🚀</div>
+          <div class="label">Express API Server</div>
+          <div class="sub">Node.js 24 · REST endpoints</div>
+          <div class="sub" style="margin-top:4px; color:#7c87a0;">Runs on :4000 · HMAC auth · Role middleware</div>
+        </div>
+      </div>
+
+      <div class="arch-down" style="margin:0 auto;"></div>
+
+      <!-- SQLite -->
+      <div style="display:flex; justify-content:center;">
+        <div class="arch-box border-green" style="min-width:280px;">
+          <div class="icon">🗄️</div>
+          <div class="label">SQLite Database</div>
+          <div class="sub">node:sqlite (built-in) · single file</div>
+          <div class="sub" style="margin-top:4px; color:#7c87a0;">atomquest.db — no separate DB server</div>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="font-size:12px; color:var(--muted); margin-top:12px; text-align:center;">
+      Two processes (frontend + backend) and one file (database). That's the entire stack.
+    </p>
+  </section>
+
+  <!-- ═══════════ 2. TECH STACK ═══════════ -->
+  <section>
+    <h2><span class="num">2</span> Technology Stack</h2>
+    <table class="decision-table" style="background:var(--surface); border-radius:var(--radius); overflow:hidden;">
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>Technology</th>
+          <th>Why this choice</th>
+          <th>Alternative considered</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--accent2);">UI Framework</td>
+          <td class="tech">React 18 + Vite</td>
+          <td class="reason">Component model fits role-based UI; Vite gives instant HMR</td>
+          <td class="alt">Next.js (overkill — no SSR needed)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent2);">Styling</td>
+          <td class="tech">Tailwind CSS v4</td>
+          <td class="reason">Utility-first, no build step for CSS, design tokens baked in</td>
+          <td class="alt">CSS Modules / Styled Components</td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent2);">Charts</td>
+          <td class="tech">Recharts</td>
+          <td class="reason">React-native, responsive, zero config for bar/line/pie charts</td>
+          <td class="alt">Chart.js (imperative API, less React-idiomatic)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent4);">Backend</td>
+          <td class="tech">Node.js 24 + Express</td>
+          <td class="reason">Minimal overhead, same language as frontend, huge ecosystem</td>
+          <td class="alt">FastAPI / Django (separate language, heavier)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent4);">Authentication</td>
+          <td class="tech">HMAC-signed tokens</td>
+          <td class="reason">Stateless — no Redis/session store needed; tamper-proof</td>
+          <td class="alt">JWT (larger token size); Sessions (requires store)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent3);">Database</td>
+          <td class="tech">SQLite (node:sqlite)</td>
+          <td class="reason">Zero-cost, single file, zero config, built into Node 24 — no extra dependency</td>
+          <td class="alt">PostgreSQL (separate server, cost); MongoDB (no relations)</td>
+        </tr>
+        <tr>
+          <td style="color:var(--accent3);">Routing</td>
+          <td class="tech">React Router v6</td>
+          <td class="reason">Declarative nested routes with role guards; well-known API</td>
+          <td class="alt">TanStack Router (newer, less docs)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════ 3. APP LIFECYCLE FLOW ═══════════ -->
+  <section>
+    <h2><span class="num">3</span> Performance Cycle — Data Flow</h2>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="step-num" style="background:#1e1a4a; color:#a78bfa;">1</div>
+        <div>
+          <h4>Goal Creation</h4>
+          <p>Employee adds up to 8 goals with thrust area, target, weightage (must sum to 100%)</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num" style="background:#0c2d3f; color:var(--accent2);">2</div>
+        <div>
+          <h4>Submission</h4>
+          <p>Sheet submitted to manager. Status changes: <em>draft → submitted</em></p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num" style="background:#2d1800; color:var(--accent4);">3</div>
+        <div>
+          <h4>Approval</h4>
+          <p>Manager reviews, can adjust targets, then approves &amp; locks or returns for rework</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num" style="background:#0d2d22; color:var(--accent3);">4</div>
+        <div>
+          <h4>Quarterly Tracking</h4>
+          <p>Q1–Q4: Employee logs actual values. System auto-scores progress 0–150%</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num" style="background:#2d0f22; color:var(--accent5);">5</div>
+        <div>
+          <h4>Reports &amp; Audit</h4>
+          <p>CSV export, analytics dashboards, full audit trail, escalation engine</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 4. API ROUTES ═══════════ -->
+  <section>
+    <h2><span class="num">4</span> Backend API — Route Groups</h2>
+    <div class="card-grid cols-2">
+
+      <div class="card border-purple" style="border-top: 3px solid var(--accent);">
+        <h3>🔐 Auth  <code style="font-size:11px; color:var(--muted); font-weight:400;">/api/auth</code></h3>
+        <p>Login with email + password → returns HMAC-signed token.<br/>
+           <code style="font-size:11px;">/login</code> · <code style="font-size:11px;">/me</code> · <code style="font-size:11px;">/demo-accounts</code></p>
+        <span class="tag t-purple">Public</span>
+      </div>
+
+      <div class="card" style="border-top: 3px solid var(--accent2);">
+        <h3>📋 Goals  <code style="font-size:11px; color:var(--muted); font-weight:400;">/api/goals</code></h3>
+        <p>CRUD for goals and sheets. Submit, approve, return, lock/unlock workflows.
+           Shared-goal push from manager/admin.</p>
+        <span class="tag t-blue">Auth required</span>
+      </div>
+
+      <div class="card" style="border-top: 3px solid var(--accent3);">
+        <h3>📈 Tracking  <code style="font-size:11px; color:var(--muted); font-weight:400;">/api/tracking</code></h3>
+        <p>Log quarterly achievements (Q1–Q4) per goal. Manager check-in comments per quarter.
+           Progress scores computed on the fly.</p>
+        <span class="tag t-green">Auth required</span>
+      </div>
+
+      <div class="card" style="border-top: 3px solid var(--accent4);">
+        <h3>📊 Governance  <code style="font-size:11px; color:var(--muted); font-weight:400;">/api/governance</code></h3>
+        <p>CSV achievement report, completion dashboard, analytics aggregations, audit trail, escalation engine.</p>
+        <span class="tag t-orange">Manager / Admin</span>
+      </div>
+
+      <div class="card" style="border-top: 3px solid var(--accent5);">
+        <h3>📌 Reference  <code style="font-size:11px; color:var(--muted); font-weight:400;">/api/ref</code></h3>
+        <p>Read-only lookups: thrust areas, active cycle config, org directory (users list).</p>
+        <span class="tag t-pink">Auth required</span>
+      </div>
+
+      <div class="card" style="border-top: 3px solid #4a5568;">
+        <h3>⚙️ Cycle Admin  <code style="font-size:11px; color:var(--muted); font-weight:400;">/api/cycle</code></h3>
+        <p>Configure FY cycle name, open dates for goal window and each quarter.
+           Controls when employees can act.</p>
+        <span class="tag" style="background:#1a1d27; color:#4a5568;">Admin only</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. DATABASE ═══════════ -->
+  <section>
+    <h2><span class="num">5</span> Database Schema (SQLite)</h2>
+    <div class="schema-grid">
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#1e1a4a; color:#a78bfa;">👤 users</div>
+        <div class="field"><span class="fname">id</span><span class="ftype">int PK</span></div>
+        <div class="field"><span class="fname">name, email</span><span class="ftype">text</span></div>
+        <div class="field"><span class="fname">role</span><span class="ftype">employee | manager | admin</span></div>
+        <div class="field"><span class="fname">manager_id</span><span class="ftype">FK → users</span></div>
+        <div class="field"><span class="fname">department, title</span><span class="ftype">text</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#0c2d3f; color:var(--accent2);">🗓️ cycles</div>
+        <div class="field"><span class="fname">id, name, fy</span><span class="ftype">text</span></div>
+        <div class="field"><span class="fname">status</span><span class="ftype">active | closed</span></div>
+        <div class="field"><span class="fname">goal_window_open</span><span class="ftype">date</span></div>
+        <div class="field"><span class="fname">q1_open … q4_open</span><span class="ftype">date</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#2d1800; color:var(--accent4);">📄 goal_sheets</div>
+        <div class="field"><span class="fname">id</span><span class="ftype">int PK</span></div>
+        <div class="field"><span class="fname">employee_id</span><span class="ftype">FK → users</span></div>
+        <div class="field"><span class="fname">cycle_id</span><span class="ftype">FK → cycles</span></div>
+        <div class="field"><span class="fname">status</span><span class="ftype">draft|submitted|approved|returned</span></div>
+        <div class="field"><span class="fname">locked</span><span class="ftype">bool</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#0d2d22; color:var(--accent3);">🎯 goals</div>
+        <div class="field"><span class="fname">id, sheet_id</span><span class="ftype">FK</span></div>
+        <div class="field"><span class="fname">thrust_area_id</span><span class="ftype">FK</span></div>
+        <div class="field"><span class="fname">title, description</span><span class="ftype">text</span></div>
+        <div class="field"><span class="fname">uom_type</span><span class="ftype">numeric|percent|timeline|zero</span></div>
+        <div class="field"><span class="fname">target, weightage</span><span class="ftype">real</span></div>
+        <div class="field"><span class="fname">shared_origin_id</span><span class="ftype">FK (nullable)</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#2d0f22; color:var(--accent5);">📊 achievements</div>
+        <div class="field"><span class="fname">id, goal_id</span><span class="ftype">FK</span></div>
+        <div class="field"><span class="fname">quarter</span><span class="ftype">Q1 | Q2 | Q3 | Q4</span></div>
+        <div class="field"><span class="fname">actual_value</span><span class="ftype">real</span></div>
+        <div class="field"><span class="fname">status</span><span class="ftype">Not Started | On Track | Completed</span></div>
+        <div class="field"><span class="fname">completion_date</span><span class="ftype">date (nullable)</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#1a2d1a; color:#86efac;">💬 checkins</div>
+        <div class="field"><span class="fname">id, sheet_id</span><span class="ftype">FK</span></div>
+        <div class="field"><span class="fname">quarter</span><span class="ftype">Q1–Q4</span></div>
+        <div class="field"><span class="fname">manager_id</span><span class="ftype">FK → users</span></div>
+        <div class="field"><span class="fname">comment</span><span class="ftype">text</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#1a1a2d; color:#94a3b8;">📝 audit_log</div>
+        <div class="field"><span class="fname">entity, entity_id</span><span class="ftype">text / int</span></div>
+        <div class="field"><span class="fname">user_id</span><span class="ftype">FK → users</span></div>
+        <div class="field"><span class="fname">action, field</span><span class="ftype">text</span></div>
+        <div class="field"><span class="fname">old_value → new_value</span><span class="ftype">text</span></div>
+        <div class="field"><span class="fname">created_at</span><span class="ftype">timestamp</span></div>
+      </div>
+
+      <div class="schema-table">
+        <div class="table-header" style="background:#2d2200; color:#fbbf24;">🚨 escalations</div>
+        <div class="field"><span class="fname">rule</span><span class="ftype">text</span></div>
+        <div class="field"><span class="fname">employee_id</span><span class="ftype">FK → users</span></div>
+        <div class="field"><span class="fname">level</span><span class="ftype">L1-Employee | L2-Manager | L3-HR</span></div>
+        <div class="field"><span class="fname">status</span><span class="ftype">open | resolved</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. ROLES ═══════════ -->
+  <section>
+    <h2><span class="num">6</span> Role-Based Access Control</h2>
+    <div class="role-grid">
+
+      <div class="role-card" style="border-top: 3px solid var(--accent3);">
+        <div class="role-title">👨‍💼 <span style="color:var(--accent3);">Employee</span></div>
+        <ul>
+          <li>Create &amp; edit own goals (while draft)</li>
+          <li>Submit goal sheet to manager</li>
+          <li>Log quarterly achievements</li>
+          <li>View own progress scores</li>
+          <li>View shared goals pushed by manager</li>
+        </ul>
+      </div>
+
+      <div class="role-card" style="border-top: 3px solid var(--accent2);">
+        <div class="role-title">🏢 <span style="color:var(--accent2);">Manager</span></div>
+        <ul>
+          <li>Review all team members' sheets</li>
+          <li>Adjust targets before approving</li>
+          <li>Approve &amp; lock or return for rework</li>
+          <li>Write quarterly check-in feedback</li>
+          <li>Push shared goals to team members</li>
+          <li>View team analytics</li>
+        </ul>
+      </div>
+
+      <div class="role-card" style="border-top: 3px solid var(--accent4);">
+        <div class="role-title">🔑 <span style="color:var(--accent4);">Admin (HR)</span></div>
+        <ul>
+          <li>Configure FY cycle &amp; quarter dates</li>
+          <li>View all sheets across org</li>
+          <li>Unlock any approved/locked sheet</li>
+          <li>Download CSV achievement reports</li>
+          <li>View full audit trail</li>
+          <li>Run escalation engine</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. SCORING ═══════════ -->
+  <section>
+    <h2><span class="num">7</span> Scoring Logic</h2>
+    <div class="card-grid cols-2">
+
+      <div class="card">
+        <h3>📐 Per-Goal Score (0–150%)</h3>
+        <p>Computed automatically when an achievement is logged:</p>
+        <br/>
+        <table style="width:100%; font-size:12px; border-collapse:collapse;">
+          <tr>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--accent2);">numeric_min / percent</td>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--muted);">actual ÷ target (higher = better)</td>
+          </tr>
+          <tr>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--accent2);">numeric_max</td>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--muted);">target ÷ actual (lower = better)</td>
+          </tr>
+          <tr>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--accent2);">timeline</td>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--muted);">on-time → 100%, late → 50%</td>
+          </tr>
+          <tr>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--accent2);">zero-based</td>
+            <td style="padding:5px 8px; border:1px solid var(--border); color:var(--muted);">actual = 0 → 100%, else 0%</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>⚖️ Sheet Score (weighted average)</h3>
+        <p style="margin-bottom:12px;">Each goal's score is multiplied by its weightage. Sum across all goals gives the overall sheet score.</p>
+        <div style="background:var(--surface2); border-radius:8px; padding:14px 16px; font-family:monospace; font-size:12px; color:var(--accent2);">
+          sheetScore = Σ ( goalScore<sub>i</sub> × weightage<sub>i</sub> ) / 100
+        </div>
+        <p style="margin-top:12px; font-size:12px; color:var(--muted);">
+          Unachieved goals contribute 0%. Score caps at 150% per goal to reward stretch targets.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. HOSTING ═══════════ -->
+  <section>
+    <h2><span class="num">8</span> Hosting Strategy</h2>
+
+    <div class="hosting-banner">
+      <div class="icon">💡</div>
+      <div>
+        <h3>Zero-Infrastructure Design</h3>
+        <p>The entire application is designed to run on a single small VM, container, or free-tier hosting service — no managed database, no message queue, no session store.</p>
+      </div>
+    </div>
+
+    <div class="hosting-specs">
+      <div class="spec-item">
+        <div class="spec-val">1</div>
+        <div class="spec-label">Node.js process (API)</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-val">1</div>
+        <div class="spec-label">Static build (Frontend)</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-val">1</div>
+        <div class="spec-label">SQLite file (DB)</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-val">$0</div>
+        <div class="spec-label">DB hosting cost</div>
+      </div>
+    </div>
+
+    <div class="card-grid cols-2" style="margin-top:16px;">
+
+      <div class="card" style="border-top:3px solid var(--accent3);">
+        <h3>🐋 Docker / Container</h3>
+        <p>Both processes in a single container image. The <code>atomquest.db</code> file is mounted as a volume for persistence. Ideal for any cloud container service (Fly.io, Railway, Render, etc.).</p>
+        <span class="tag t-green">Recommended</span>
+      </div>
+
+      <div class="card" style="border-top:3px solid var(--accent2);">
+        <h3>☁️ Render.com</h3>
+        <p>A <code>render.yaml</code> is already included in the repo. One web service for the API, one static site for the frontend build. Free tier is sufficient for a team of ~100.</p>
+        <span class="tag t-blue">Config included</span>
+      </div>
+
+      <div class="card" style="border-top:3px solid var(--accent);">
+        <h3>🖥️ Single VM</h3>
+        <p>Run both processes with PM2 or systemd on any Linux VM (e.g., AWS t2.micro free tier). Nginx reverse proxy serves the frontend build and proxies <code>/api</code> to port 4000.</p>
+        <span class="tag t-purple">Classic</span>
+      </div>
+
+      <div class="card" style="border-top:3px solid #4a5568;">
+        <h3>💻 Local Development</h3>
+        <p>Two terminals: <code>cd server &amp;&amp; npm start</code> and <code>cd client &amp;&amp; npm run dev</code>. The Vite proxy forwards <code>/api</code> requests to <code>:4000</code> automatically.</p>
+        <span class="tag" style="background:#1a1d27; color:#4a5568;">Dev mode</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ 9. ESCALATIONS ═══════════ -->
+  <section>
+    <h2><span class="num">9</span> Escalation Engine</h2>
+    <div class="card">
+      <p style="margin-bottom:16px; font-size:13px; color:var(--muted);">
+        Rule-based flags are computed when an Admin triggers a check. Each rule has a threshold and an escalation chain.
+      </p>
+      <table class="decision-table">
+        <thead>
+          <tr>
+            <th>Rule</th>
+            <th>Threshold</th>
+            <th>Escalation Chain</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tech">Goals not submitted</td>
+            <td class="reason">7 days after cycle goal window opens</td>
+            <td><span class="tag t-green" style="font-size:11px;">L1 → Employee</span></td>
+          </tr>
+          <tr>
+            <td class="tech">Manager hasn't approved</td>
+            <td class="reason">7 days after employee submission</td>
+            <td><span class="tag t-blue" style="font-size:11px;">L2 → Manager</span></td>
+          </tr>
+          <tr>
+            <td class="tech">Check-in overdue</td>
+            <td class="reason">Quarter window open but no check-in recorded</td>
+            <td><span class="tag t-orange" style="font-size:11px;">L2 → Manager</span></td>
+          </tr>
+          <tr>
+            <td class="tech">Repeated non-compliance</td>
+            <td class="reason">Escalation unresolved at L2</td>
+            <td><span class="tag t-pink" style="font-size:11px;">L3 → HR / Admin</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  AtomQuest — Goal Setting &amp; Performance Portal &nbsp;·&nbsp; Built for AtomQuest Hackathon 1.0
+</footer>
+
+</body>
+</html>
