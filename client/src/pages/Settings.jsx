@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import { Card, PageHeader, Button, Badge, Spinner, Banner, Field, Input, Select } from '../ui.jsx';
+import {
+  Card, PageHeader, Button, Badge, Spinner, Banner, Field, Input, Select, Icon, StatusDot,
+} from '../ui.jsx';
 
-function StatusRow({ label, on, note }) {
+function StatusRow({ label, on, hint, note }) {
   return (
-    <div className="flex items-center gap-2.5 py-1.5">
-      <span className={`w-2 h-2 rounded-full ${on ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
-      <Badge color={on ? 'green' : 'slate'}>{on ? 'Connected' : 'Not configured'}</Badge>
-      {note && <span className="text-xs text-slate-400">{note}</span>}
+    <div className="flex items-start gap-3 py-2.5 border-t border-paper-100 first:border-t-0">
+      <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${on ? 'bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]' : 'bg-paper-300'}`} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[12.5px] font-semibold text-slate-800">{label}</span>
+          <Badge color={on ? 'green' : 'slate'} dot>{on ? 'Connected' : 'Not configured'}</Badge>
+        </div>
+        {(hint || note) && <div className="text-[11px] text-slate-400 mt-1">{hint || note}</div>}
+      </div>
     </div>
   );
 }
@@ -19,7 +25,7 @@ export default function Settings() {
   const [kind, setKind] = useState('workflow');
   const [busy, setBusy] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [msg, setMsg] = useState(null); // { tone, text }
+  const [msg, setMsg] = useState(null);
 
   function load() {
     api.get('/settings/integrations').then((d) => {
@@ -68,19 +74,23 @@ export default function Settings() {
       {msg && <div className="mb-4"><Banner tone={msg.tone}>{msg.text}</Banner></div>}
 
       {/* --- Microsoft Teams (in-app configurable) --- */}
-      <Card className="p-5 mb-4">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="font-bold text-slate-900">Microsoft Teams</h3>
-          <Badge color={data.teams.configured ? 'green' : 'slate'}>
+      <Card className="p-5 mb-3">
+        <div className="flex items-start justify-between gap-4 mb-1 flex-wrap">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 grid place-items-center">
+              <Icon name="layers" className="w-4 h-4" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-slate-900 text-[14px]">Microsoft Teams</h3>
+              <p className="text-[11.5px] text-slate-500">Posts a card to a Teams channel on each lifecycle event.</p>
+            </div>
+          </div>
+          <Badge color={data.teams.configured ? 'green' : 'slate'} dot>
             {data.teams.configured ? 'Connected' : 'Not connected'}
           </Badge>
         </div>
-        <p className="text-sm text-slate-500 mb-4">
-          Posts a card to a Teams channel on goal submission, approval, rejection and
-          check-in reminders — with a deep link to the goal sheet.
-        </p>
 
-        <div className="space-y-3 max-w-xl">
+        <div className="space-y-3 max-w-xl mt-4 pt-4 border-t border-paper-100">
           <Field label="Webhook type"
             hint="Power Automate Workflows is the current method. Use Incoming Webhook only for older connector URLs.">
             <Select value={kind} onChange={(e) => setKind(e.target.value)}>
@@ -96,27 +106,36 @@ export default function Settings() {
         </div>
 
         <div className="flex flex-wrap gap-2 mt-4">
-          <Button onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
+          <Button variant="primary" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
           <Button variant="secondary" onClick={test} disabled={testing || !data.teams.configured}>
+            <Icon name="bell" className="w-3.5 h-3.5" />
             {testing ? 'Sending…' : 'Send test card'}
           </Button>
           {data.teams.configured && (
-            <Button variant="secondary" onClick={disconnect} disabled={busy}>Disconnect</Button>
+            <Button variant="ghost" onClick={disconnect} disabled={busy}>Disconnect</Button>
           )}
         </div>
       </Card>
 
       {/* --- Email + Entra (env-driven, read-only status) --- */}
       <Card className="p-5">
-        <h3 className="font-bold text-slate-900 mb-1">Server-managed integrations</h3>
-        <p className="text-sm text-slate-500 mb-3">
-          Email and Single Sign-On hold secret credentials, so they are configured
-          via server environment variables (<code>server/.env</code>) rather than in-app.
-        </p>
-        <StatusRow label="Email (SMTP)" on={data.smtp.configured}
-          note={data.smtp.configured ? null : 'set SMTP_* in server/.env'} />
-        <StatusRow label="Microsoft Entra ID SSO" on={data.entra.configured}
-          note={data.entra.configured ? null : 'set AZURE_* in server/.env'} />
+        <div className="flex items-start gap-2.5 mb-2">
+          <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 grid place-items-center">
+            <Icon name="lock" className="w-4 h-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-slate-900 text-[14px]">Server-managed integrations</h3>
+            <p className="text-[11.5px] text-slate-500 max-w-md">
+              Email and SSO hold secret credentials, so they live in <code className="text-[11px] text-slate-700">server/.env</code> rather than in-app.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 pt-1">
+          <StatusRow label="Email (SMTP)" on={data.smtp.configured}
+            note={data.smtp.configured ? null : 'Set SMTP_* in server/.env to enable transactional email.'} />
+          <StatusRow label="Microsoft Entra ID SSO" on={data.entra.configured}
+            note={data.entra.configured ? null : 'Set AZURE_* in server/.env to enable single sign-on.'} />
+        </div>
       </Card>
     </div>
   );

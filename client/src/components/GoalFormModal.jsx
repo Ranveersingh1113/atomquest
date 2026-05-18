@@ -77,8 +77,10 @@ export default function GoalFormModal({ open, onClose, onSave, thrustAreas, init
         )}
         {error && <Banner tone="error">{error}</Banner>}
         <div className="flex justify-end gap-2 pt-1">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save Goal'}</Button>
+          <Button size="sm" variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button size="sm" variant="primary" onClick={save} disabled={busy}>
+            {busy ? 'Saving…' : 'Save Goal'}
+          </Button>
         </div>
       </div>
     </Modal>

@@ -422,10 +422,8 @@ const U = {};   // user objects
   log(escRun.data.every(e => /^L[123] - /.test(e.level)), 'every escalation carries a valid L1/L2/L3 level');
   log(escRun.data.every(e => e.rule && e.employee && e.detail), 'every escalation carries rule + employee + detail');
   log((await call('POST', '/escalations/run', { token: T.rahul })).status === 403, 'non-admin cannot run the escalation engine');
-  const escList = await call('GET', '/escalations', { token: T.amit });
-  log(escList.status === 200, `GET /escalations responds for an employee (HTTP ${escList.status})`);
-  if (escList.status === 200 && escList.data.length > 0)
-    finding('GET /escalations has no role guard — any authenticated employee can read the full org-wide escalation log. BRD §5.3 says the escalation log should be "visible to Admin / HR".');
+  log((await call('GET', '/escalations', { token: T.amit })).status === 403, 'GET /escalations is admin-gated — employee blocked (BRD §5.3)');
+  log((await call('GET', '/escalations', { token: T.admin })).status === 200, 'admin can read the escalation log');
   if (escRun.data.length) {
     log((await call('PUT', `/escalations/${escRun.data[0].id}/resolve`, { token: T.rahul })).status === 403, 'non-admin cannot resolve an escalation');
     log((await call('PUT', `/escalations/${escRun.data[0].id}/resolve`, { token: T.admin })).status === 200, 'admin resolves an escalation');

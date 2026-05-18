@@ -22,34 +22,34 @@ export default function GoalCard({ goal: g, showTracking = false, quarter = 'Q1'
 
   return (
     <Card className="p-0 overflow-hidden" hover accent={accentFor(g.thrust_area)}>
-      <div className="p-4 pl-5">
+      <div className="p-3.5 pl-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <Badge color="indigo">{g.thrust_area}</Badge>
               {g.is_shared_copy && <Badge color="blue" dot>Shared KPI</Badge>}
             </div>
-            <h3 className="font-bold text-slate-900 mt-2 leading-snug">{g.title}</h3>
-            {g.description && <p className="text-sm text-slate-500 mt-0.5">{g.description}</p>}
-            <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
-              <Icon name="bolt" className="w-3.5 h-3.5" />
+            <h3 className="font-semibold text-slate-900 mt-1.5 leading-snug text-[14px] tracking-[-0.005em]">{g.title}</h3>
+            {g.description && <p className="text-[12.5px] text-slate-500 mt-0.5 leading-relaxed">{g.description}</p>}
+            <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-slate-400">
+              <Icon name="bolt" className="w-3 h-3" />
               {UOM_LABELS[g.uom_type]}
             </div>
           </div>
 
           {showTracking && scorePct != null ? (
-            <Ring value={scorePct} size={66} stroke={7} sublabel="score" />
+            <Ring value={scorePct} size={60} stroke={6} sublabel="score" />
           ) : (
             <div className="text-right shrink-0">
-              <div className="text-2xl font-extrabold text-slate-900">{g.weightage}%</div>
-              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Weightage</div>
+              <div className="text-[22px] font-bold text-slate-900 leading-none tracking-[-0.025em] num">{g.weightage}%</div>
+              <div className="text-[9.5px] font-bold text-slate-400 uppercase tracking-[0.14em] mt-1">Weight</div>
             </div>
           )}
         </div>
 
-        <div className="mt-3.5 pt-3.5 border-t border-slate-100 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+        <div className="mt-3 pt-3 border-t border-paper-200 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px]">
           {showTracking && scorePct != null && (
-            <Metric label="Weightage" value={`${g.weightage}%`} />
+            <Metric label="Weight" value={`${g.weightage}%`} />
           )}
           <Metric label="Target" value={plannedValue(g)} />
           {showTracking && (
@@ -68,8 +68,8 @@ export default function GoalCard({ goal: g, showTracking = false, quarter = 'Q1'
 function Metric({ label, value }) {
   return (
     <div>
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</div>
-      <div className="font-bold text-slate-800">{value}</div>
+      <div className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-slate-400">{label}</div>
+      <div className="font-semibold text-slate-900 num">{value}</div>
     </div>
   );
 }

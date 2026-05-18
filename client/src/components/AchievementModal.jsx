@@ -28,12 +28,17 @@ export default function AchievementModal({ open, onClose, onSave, goal, quarter 
   return (
     <Modal open={open} onClose={onClose} title={`${quarter} Achievement — ${goal?.title || ''}`}>
       <div className="space-y-3">
-        <div className="text-sm text-slate-500">
-          {isTimeline
-            ? `Planned completion: ${goal?.target_date || '—'}`
-            : isZero
-              ? 'Target: 0 (zero-based goal)'
-              : `Planned target: ${goal?.target}`}
+        <div className="rounded-lg bg-paper-50 border border-paper-200 px-3 py-2 text-[12px] text-slate-600">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 block mb-0.5">
+            {isTimeline ? 'Planned completion' : isZero ? 'Target' : 'Planned target'}
+          </span>
+          <span className="font-semibold text-slate-800 num" style={{ fontFamily: 'var(--font-mono)' }}>
+            {isTimeline
+              ? (goal?.target_date || '—')
+              : isZero
+                ? '0 (zero-based)'
+                : goal?.target}
+          </span>
         </div>
         {isTimeline ? (
           <Field label="Actual Completion Date">
@@ -54,8 +59,10 @@ export default function AchievementModal({ open, onClose, onSave, goal, quarter 
         </Field>
         {error && <Banner tone="error">{error}</Banner>}
         <div className="flex justify-end gap-2 pt-1">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save Achievement'}</Button>
+          <Button size="sm" variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button size="sm" variant="primary" onClick={save} disabled={busy}>
+            {busy ? 'Saving…' : 'Save Achievement'}
+          </Button>
         </div>
       </div>
     </Modal>

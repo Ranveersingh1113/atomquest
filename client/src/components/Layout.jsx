@@ -42,7 +42,11 @@ const ROUTE_TITLE = {
 };
 
 function Logo() {
-  return <img src="/logo.png" alt="Atomberg" className="w-10 h-10 rounded-xl" />;
+  return (
+    <div className="relative w-7 h-7 rounded-lg overflow-hidden shrink-0">
+      <img src="/logo.png" alt="Atomberg" className="absolute inset-0 w-full h-full object-cover" />
+    </div>
+  );
 }
 
 export default function Layout({ children }) {
@@ -62,33 +66,45 @@ export default function Layout({ children }) {
   return (
     <div className="flex h-full">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 bg-ink-950 border-r border-white/[0.06] flex flex-col">
-        <div className="px-5 py-5 border-b border-white/[0.06]">
-          <div className="flex items-center gap-3">
+      <aside className="w-[220px] shrink-0 bg-ink-950 border-r border-white/[0.06] flex flex-col">
+        <div className="px-4 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
             <Logo />
-            <div>
-              <div className="text-white font-bold leading-tight tracking-tight">Atomberg</div>
-              <div className="text-[10.5px] text-slate-500 font-medium tracking-wide">Goal Tracking Portal</div>
+            <div className="min-w-0">
+              <div className="text-white font-bold leading-tight tracking-tight text-[13.5px]">Atomberg</div>
+              <div className="text-[10px] text-slate-500 font-medium tracking-[0.04em]">Goal Tracking</div>
             </div>
           </div>
         </div>
 
-        <div className="px-5 pt-5 pb-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
-          Navigation
+        {/* Search stub (visual ⌘K hint) */}
+        <div className="px-3 pt-3">
+          <button
+            type="button"
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.06] text-slate-500 hover:text-slate-300 hover:border-white/[0.10] transition-colors text-[12px]"
+            onClick={() => { /* TODO: open command palette */ }}>
+            <Icon name="search" className="w-3.5 h-3.5" />
+            <span className="flex-1 text-left">Search…</span>
+            <span className="kbd" style={{ background: 'transparent', color: '#6e6e76', borderColor: '#2a2a30' }}>⌘K</span>
+          </button>
         </div>
-        <nav data-tour="sidebar" className="flex-1 px-3 space-y-1 overflow-y-auto">
+
+        <div className="px-4 pt-3 pb-2 text-[9.5px] font-bold uppercase tracking-[0.18em] text-slate-600">
+          Workspace
+        </div>
+        <nav data-tour="sidebar" className="flex-1 px-2 space-y-[1px] overflow-y-auto">
           {items.map(([to, label, icon]) => (
             <NavLink key={to} to={to}
               className={({ isActive }) =>
-                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
+                `group relative flex items-center gap-2.5 rounded-md px-2.5 h-8 text-[12.5px] font-semibold transition-colors ${
                   isActive
-                    ? 'bg-white/[0.07] text-brand-400 ring-1 ring-inset ring-white/[0.06]'
-                    : 'text-slate-500 hover:bg-white/[0.04] hover:text-slate-200'
+                    ? 'bg-brand-500/[0.08] text-white ring-1 ring-inset ring-brand-500/[0.18]'
+                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
                 }`}>
               {({ isActive }) => (
                 <>
-                  {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-brand-500" />}
-                  <Icon name={icon} className={`w-[18px] h-[18px] ${isActive ? 'text-brand-500' : ''}`} />
+                  {isActive && <span className="absolute left-[-1px] top-2 bottom-2 w-[2px] rounded-r-full bg-brand-500" />}
+                  <Icon name={icon} className={`w-[15px] h-[15px] ${isActive ? 'text-brand-500' : 'text-slate-600'}`} />
                   {label}
                 </>
               )}
@@ -96,16 +112,32 @@ export default function Layout({ children }) {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-white/[0.06]">
-          <div className="flex items-center gap-3 px-1 py-1">
-            <div className="w-9 h-9 rounded-full bg-brand-500 grid place-items-center text-ink-950 font-bold text-xs shrink-0">{initials}</div>
-            <div className="min-w-0">
-              <div className="text-sm font-semibold text-white truncate">{user.name}</div>
-              <div className="text-[11px] text-slate-500 truncate">{ROLE_LABEL[user.role]}</div>
+        {/* Cycle context block */}
+        {cycle && (
+          <div className="mx-3 mb-3 rounded-lg bg-white/[0.03] border border-white/[0.06] px-2.5 py-2 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-500 shadow-[0_0_0_3px_rgba(245,166,35,0.16)]" />
+            <div className="leading-tight min-w-0">
+              <div className="text-[11.5px] font-semibold text-white truncate">{cycle.fy}</div>
+              <div className="text-[10px] text-slate-500">
+                {cycle.openQuarters?.length
+                  ? `${cycle.openQuarters[cycle.openQuarters.length - 1]} window open`
+                  : 'No open quarter'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="p-2.5 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2.5 px-1 py-1">
+            <div className="w-7 h-7 rounded-full bg-brand-500 grid place-items-center text-ink-950 font-bold text-[10.5px] shrink-0">{initials}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[12.5px] font-semibold text-white truncate">{user.name}</div>
+              <div className="text-[10.5px] text-slate-500 truncate">{ROLE_LABEL[user.role]}</div>
             </div>
           </div>
           <button onClick={() => { logout(); nav('/login'); }}
-            className="w-full mt-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-white/[0.04] hover:text-white transition-colors">
+            className="mt-1.5 w-full flex items-center justify-center gap-1.5 rounded-md h-8 text-[11.5px] font-semibold text-slate-300 bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:text-white transition-colors">
+            <Icon name="arrow" className="w-3.5 h-3.5" />
             Sign out
           </button>
         </div>
@@ -113,25 +145,27 @@ export default function Layout({ children }) {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200/80 px-5 sm:px-7 h-14 flex items-center justify-between">
-          <div className="font-bold text-slate-800 text-[15px] tracking-tight truncate">{pageTitle}</div>
-          <div className="flex items-center gap-2.5 shrink-0">
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-paper-200 px-5 sm:px-6 h-12 flex items-center justify-between">
+          <div className="font-semibold text-slate-900 text-[13.5px] tracking-[-0.005em] truncate">{pageTitle}</div>
+          <div className="flex items-center gap-2 shrink-0">
             <button onClick={() => startTour(user.role, { extensive: isPortalAccount(user), navigate: nav })}
-              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 px-2.5 py-1 text-xs font-bold hover:bg-slate-200 hover:text-slate-800 transition-colors">
+              className="inline-flex items-center gap-1.5 rounded-md px-2 h-7 text-[11.5px] font-semibold text-slate-600 hover:bg-paper-100 hover:text-slate-900 transition-colors">
               <Icon name="spark" className="w-3.5 h-3.5" />
-              Take a tour
+              Tour
             </button>
-            {cycle && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200 px-2.5 py-1 text-xs font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                {cycle.fy}
-              </span>
+            {user.role === 'admin' && (
+              <button onClick={() => nav('/notifications')}
+                title="Notifications"
+                className="w-7 h-7 grid place-items-center rounded-md text-slate-500 hover:bg-paper-100 hover:text-slate-900 transition-colors">
+                <Icon name="bell" className="w-3.5 h-3.5" />
+              </button>
             )}
-            <span className="text-xs font-medium text-slate-400">{today}</span>
+            <span className="w-px h-4 bg-paper-200 mx-1" />
+            <span className="text-[11px] font-medium text-slate-400 hidden sm:inline" style={{ fontFamily: 'var(--font-mono)' }}>{today}</span>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">
-          <div data-tour="page" className="max-w-6xl mx-auto px-5 sm:px-7 py-7">{children}</div>
+          <div data-tour="page" className="max-w-6xl mx-auto px-5 sm:px-6 py-6">{children}</div>
         </main>
       </div>
     </div>

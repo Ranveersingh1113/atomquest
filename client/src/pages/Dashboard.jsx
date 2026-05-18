@@ -4,8 +4,8 @@ import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { maybeAutoStartTour } from '../tour.js';
 import {
-  Card, Stat, Badge, Banner, Spinner, Button, Ring, Icon, ProgressBar,
-  sheetStatusBadge,
+  Card, Stat, Banner, Spinner, Button, Ring, Icon, ProgressBar,
+  StatusDot, sheetStatusBadge,
 } from '../ui.jsx';
 
 export default function Dashboard() {
@@ -25,7 +25,7 @@ export default function Dashboard() {
   const latestQ = cycle.openQuarters?.[cycle.openQuarters.length - 1] || 'Q1';
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {user.role === 'employee' && <EmployeeView sheet={sheets[0]} latestQ={latestQ} cycle={cycle} user={user} nav={nav} />}
       {user.role === 'manager' && <ManagerView sheets={sheets} latestQ={latestQ} cycle={cycle} user={user} nav={nav} />}
       {user.role === 'admin' && <AdminView sheets={sheets} cycle={cycle} latestQ={latestQ} user={user} nav={nav} />}
@@ -35,16 +35,20 @@ export default function Dashboard() {
 
 function Hero({ user, cycle, children }) {
   return (
-    <div data-tour="hero" className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950 p-6 text-white aq-fade">
-      <div className="absolute -right-16 -top-28 w-80 h-80 rounded-full bg-brand-500/20 blur-3xl aq-glow" />
-      <div className="absolute right-28 -bottom-20 w-48 h-48 rounded-full bg-brand-500/10 blur-2xl" />
+    <div
+      data-tour="hero"
+      className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950 p-5 text-white aq-fade">
+      <div className="absolute -right-16 -top-24 w-72 h-72 rounded-full bg-brand-500/[0.18] blur-3xl aq-glow" />
+      <div className="absolute right-24 -bottom-16 w-44 h-44 rounded-full bg-brand-500/[0.10] blur-2xl" />
       <div className="relative flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="text-xs font-bold uppercase tracking-[0.18em] text-brand-400">
+          <div className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-brand-400">
             {cycle.name} · {cycle.fy}
           </div>
-          <h1 className="text-2xl font-extrabold mt-1.5">Welcome back, {user.name.split(' ')[0]}</h1>
-          <p className="text-sm text-slate-400 mt-1">Here&#39;s an overview of your performance this cycle.</p>
+          <h1 className="text-[22px] font-extrabold tracking-[-0.022em] mt-1.5">
+            Welcome back, {user.name.split(' ')[0]}.
+          </h1>
+          <p className="text-[12.5px] text-slate-400 mt-1">Here&#39;s where the cycle stands.</p>
         </div>
         {children}
       </div>
@@ -54,19 +58,19 @@ function Hero({ user, cycle, children }) {
 
 function HeroRing({ value, caption }) {
   const pct = Math.max(0, Math.min(100, value));
-  const r = 34, c = 2 * Math.PI * r;
+  const r = 30, c = 2 * Math.PI * r;
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-white/[0.04] ring-1 ring-white/[0.08] px-4 py-3">
-      <div className="relative grid place-items-center w-[84px] h-[84px]">
-        <svg width="84" height="84" className="-rotate-90">
-          <circle cx="42" cy="42" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-          <circle cx="42" cy="42" r={r} fill="none" stroke="#f5a623" strokeWidth="8" strokeLinecap="round"
+    <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] ring-1 ring-white/[0.08] px-3.5 py-2.5">
+      <div className="relative grid place-items-center w-[72px] h-[72px]">
+        <svg width="72" height="72" className="-rotate-90">
+          <circle cx="36" cy="36" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="7" />
+          <circle cx="36" cy="36" r={r} fill="none" stroke="#f5a623" strokeWidth="7" strokeLinecap="round"
             strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c}
             style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(0.16,1,0.3,1)' }} />
         </svg>
-        <span className="absolute text-xl font-extrabold">{Math.round(pct)}%</span>
+        <span className="absolute text-[18px] font-extrabold num">{Math.round(pct)}%</span>
       </div>
-      <div className="text-sm font-medium text-slate-300 max-w-[110px]">{caption}</div>
+      <div className="text-[12px] font-medium text-slate-300 max-w-[110px] leading-snug">{caption}</div>
     </div>
   );
 }
@@ -74,7 +78,7 @@ function HeroRing({ value, caption }) {
 /* ---------- Employee ---------- */
 function EmployeeView({ sheet, latestQ, cycle, user, nav }) {
   if (!sheet) return <Banner tone="info">No goal sheet found for the active cycle.</Banner>;
-  const [color, text] = sheetStatusBadge[sheet.status];
+  const [, text] = sheetStatusBadge[sheet.status];
   const score = sheet.quarterScores[latestQ] || 0;
   return (
     <>
@@ -82,12 +86,26 @@ function EmployeeView({ sheet, latestQ, cycle, user, nav }) {
         <HeroRing value={score} caption={`${latestQ} weighted progress`} />
       </Hero>
 
-      <div data-tour="stats" className="grid sm:grid-cols-3 gap-3">
-        <Stat label="Goal Sheet" value={text} icon="doc"
-          tone={sheet.status === 'approved' ? 'emerald' : sheet.status === 'returned' ? 'amber' : 'brand'} />
-        <Stat label="Goals Defined" value={`${sheet.goals.length} / 8`}
-          sub={`${sheet.totalWeightage}% weighted`} icon="target" tone="sky" />
-        <Stat label={`${latestQ} Progress`} value={`${score}%`} icon="trend" tone="emerald" />
+      <div data-tour="stats" className="grid sm:grid-cols-3 gap-2.5">
+        <Stat
+          label="Goal Sheet"
+          value={text}
+          icon="doc"
+          tone={sheet.status === 'approved' ? 'emerald' : sheet.status === 'returned' ? 'amber' : 'brand'}
+        />
+        <Stat
+          label="Goals Defined"
+          value={`${sheet.goals.length} / 8`}
+          sub={`${sheet.totalWeightage}% weighted`}
+          icon="target"
+          tone="sky"
+        />
+        <Stat
+          label={`${latestQ} Progress`}
+          value={`${score}%`}
+          icon="trend"
+          tone="emerald"
+        />
       </div>
 
       {sheet.status === 'returned' && (
@@ -123,30 +141,40 @@ function ManagerView({ sheets, latestQ, cycle, user, nav }) {
         <HeroRing value={avg} caption={`Team avg ${latestQ} progress`} />
       </Hero>
 
-      <div data-tour="stats" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div data-tour="stats" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <Stat label="Team Members" value={sheets.length} icon="users" tone="sky" />
         <Stat label="Pending Review" value={pending.length} icon="clock"
+          sub={pending.length ? `${pending.length} awaiting your approval` : 'All clear'}
           tone={pending.length ? 'amber' : 'slate'} />
         <Stat label="Approved" value={approved.length} icon="check" tone="emerald" />
         <Stat label={`Avg ${latestQ} Progress`} value={`${avg}%`} icon="trend" tone="brand" />
       </div>
 
       {pending.length > 0 && (
-        <Card className="p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Icon name="clock" className="w-5 h-5 text-amber-500" />
-            <span className="font-bold text-slate-900">Awaiting your approval</span>
+        <Card className="p-0 overflow-hidden">
+          <div className="flex items-center justify-between px-4 h-10 border-b border-paper-200">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span className="font-semibold text-slate-900 text-[13px]">Awaiting your approval</span>
+              <span className="text-[11px] text-slate-400 num" style={{ fontFamily: 'var(--font-mono)' }}>
+                {pending.length} / {sheets.length}
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400">Sorted by submitted date</span>
           </div>
-          <div className="space-y-2">
-            {pending.map((s) => (
+          <div>
+            {pending.map((s, i) => (
               <button key={s.id} onClick={() => nav(`/sheet/${s.id}`)}
-                className="w-full flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2.5 hover:bg-slate-50 hover:border-slate-300 transition-colors text-left">
-                <Avatar name={s.employee_name} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-slate-800 truncate">{s.employee_name}</div>
-                  <div className="text-xs text-slate-400">{s.goals.length} goals · {s.totalWeightage}% weighted</div>
-                </div>
-                <Icon name="arrow" className="w-4 h-4 text-slate-300" />
+                className={`w-full grid grid-cols-[28px_1fr_auto_auto] gap-3 items-center px-4 py-2.5 text-left hover:bg-paper-50 transition-colors ${i ? 'border-t border-paper-100' : ''}`}>
+                <span className="w-7 h-7 rounded-full bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200 grid place-items-center font-bold text-[10px]">
+                  {s.employee_name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[13px] font-semibold text-slate-900 truncate">{s.employee_name}</span>
+                  <span className="block text-[11px] text-slate-400 truncate">{s.goals.length} goals · {s.totalWeightage}% weighted</span>
+                </span>
+                <StatusDot color="blue">Submitted</StatusDot>
+                <Icon name="arrow" className="w-3.5 h-3.5 text-slate-300" />
               </button>
             ))}
           </div>
@@ -173,7 +201,7 @@ function AdminView({ sheets, cycle, latestQ, user, nav }) {
         <HeroRing value={completion} caption="Goal-setting completion" />
       </Hero>
 
-      <div data-tour="stats" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div data-tour="stats" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <Stat label="Goal Sheets" value={sheets.length} icon="layers" tone="sky" />
         <Stat label="Pending Approval" value={byStatus('submitted')} icon="clock"
           tone={byStatus('submitted') ? 'amber' : 'slate'} />
@@ -181,18 +209,18 @@ function AdminView({ sheets, cycle, latestQ, user, nav }) {
         <Stat label="Draft / Returned" value={byStatus('draft') + byStatus('returned')} icon="doc" tone="brand" />
       </div>
 
-      <Card className="p-5">
+      <Card className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="font-bold text-slate-900">Goal-setting completion</span>
-          <span className="text-sm font-extrabold text-brand-700">{completion}%</span>
+          <span className="font-semibold text-slate-900 text-[13px]">Goal-setting completion</span>
+          <span className="text-[13px] font-bold text-brand-700 num">{completion}%</span>
         </div>
         <ProgressBar value={completion} />
-        <div className="text-xs text-slate-400 mt-2">
+        <div className="text-[11px] text-slate-400 mt-2 num">
           {approved.length} of {sheets.length} sheets approved · Open quarters: {cycle.openQuarters?.join(', ') || 'none'}
         </div>
       </Card>
 
-      <div data-tour="primary-action" className="grid sm:grid-cols-3 gap-3">
+      <div data-tour="primary-action" className="grid sm:grid-cols-3 gap-2.5">
         <ActionCard compact icon="calendar" title="Cycle" text="Configure windows."
           cta="Manage Cycle" onClick={() => nav('/cycle')} />
         <ActionCard compact icon="doc" title="Reports" text="Export & completion."
@@ -205,25 +233,17 @@ function AdminView({ sheets, cycle, latestQ, user, nav }) {
 }
 
 /* ---------- shared bits ---------- */
-function Avatar({ name }) {
-  return (
-    <div className="w-9 h-9 rounded-full bg-brand-100 text-brand-700 grid place-items-center font-bold text-xs shrink-0">
-      {name.split(' ').map((n) => n[0]).join('')}
-    </div>
-  );
-}
-
 function ActionCard({ icon, title, text, cta, onClick, compact }) {
   return (
-    <Card className="p-5" hover>
+    <Card className="p-4" hover>
       <div className={compact ? '' : 'flex items-center justify-between gap-4 flex-wrap'}>
         <div className="flex items-start gap-3">
-          <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-50 text-brand-600 shrink-0">
-            <Icon name={icon} className="w-5 h-5" />
+          <span className="grid place-items-center w-9 h-9 rounded-lg bg-brand-50 text-brand-600 shrink-0">
+            <Icon name={icon} className="w-4 h-4" />
           </span>
           <div>
-            <div className="font-bold text-slate-900">{title}</div>
-            <div className="text-sm text-slate-500">{text}</div>
+            <div className="font-semibold text-slate-900 text-[13.5px]">{title}</div>
+            <div className="text-[12px] text-slate-500 mt-0.5">{text}</div>
           </div>
         </div>
         <Button variant={compact ? 'secondary' : 'primary'} className={compact ? 'mt-3 w-full' : ''}
