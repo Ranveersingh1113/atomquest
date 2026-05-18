@@ -54,7 +54,7 @@ The goal sheet enforces all BRD rules in real-time:
 
 ### Sheet Detail — achievements, UoM scoring, check-ins
 
-![Sheet detail](docs/screenshots/sheet-detail.png)
+![Sheet detail](docs/screenshots/sheet-details.png)
 
 After manager approval, employees log quarterly achievements. Each goal computes a weighted score using the UoM-specific formula (see scoring section below). Manager check-in comments appear inline.
 
