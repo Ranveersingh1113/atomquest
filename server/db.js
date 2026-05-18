@@ -3,7 +3,10 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new DatabaseSync(join(__dirname, 'atomberg.db'));
+// DB_PATH lets a host point the SQLite file at a persistent disk
+// (e.g. a Render disk mounted at /data). Defaults to the repo-local file.
+const dbPath = process.env.DB_PATH || join(__dirname, 'atomberg.db');
+const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA journal_mode = WAL');
 db.exec('PRAGMA foreign_keys = ON');
 

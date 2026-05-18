@@ -1,0 +1,19 @@
+# Render Blueprint — single web service: Express API + built React SPA.
+# Deploy: Render Dashboard → New → Blueprint → connect this repo.
+#
+# Persistence note: the free plan has an ephemeral filesystem, so the
+# SQLite DB resets when the instance restarts (the server auto-reseeds
+# demo data on boot, so the app is always populated). For permanent
+# data, upgrade the service to a paid plan, add a Disk mounted at
+# /data, and set the env var DB_PATH=/data/atomberg.db.
+services:
+  - type: web
+    name: atomberg-portal
+    runtime: node
+    plan: free
+    buildCommand: cd client && npm install --include=dev && npm run build && cd ../server && npm install
+    startCommand: cd server && node index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22.13.0"

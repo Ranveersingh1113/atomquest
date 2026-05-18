@@ -4,6 +4,8 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync } from 'fs';
+import db from './db.js';
+import { seed } from './seed.js';
 import authRoutes from './routes/authRoutes.js';
 import sso from './routes/sso.js';
 import ref from './routes/ref.js';
@@ -38,6 +40,18 @@ app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
+
+// Auto-seed an empty database — covers a fresh deploy or a host whose
+// disk did not carry data over. A populated DB is left untouched.
+try {
+  const { c } = db.prepare('SELECT COUNT(*) AS c FROM users').get();
+  if (c === 0) {
+    console.log('Empty database detected — seeding demo data…');
+    seed(db);
+  }
+} catch (e) {
+  console.error('Auto-seed check failed:', e.message);
+}
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Atomberg API on http://localhost:${PORT}`));
