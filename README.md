@@ -3,7 +3,7 @@
 A web portal for the full employee performance cycle: **goal creation →
 manager approval → quarterly check-ins → reporting, analytics & governance.**
 
-Built for the Atomberg Hackathon 1.0.
+Built for the Atomquest Hackathon 1.0.
 
 **Live demo:** https://atomberg-portal-zwoq.onrender.com
 
