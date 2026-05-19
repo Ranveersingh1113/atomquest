@@ -165,7 +165,7 @@ Weighted score = Σ (goal score × goal weightage).
 | CSV achievement report | Single-click export; includes employee, goal, UoM, target, Q1–Q4 actuals, computed scores |
 | Completion dashboard | Aggregate view: % sheets submitted/approved, goal status distribution |
 | Full audit trail | `audit_log` table; every write operation appends a record with actor, action, entity, before/after JSON; post-lock edits flagged |
-| Admin sheet unlock | Unlock itself is audited; admin must provide a reason |
+| Admin sheet unlock | Unlock itself is audited; admin must provide a reason (defaulted to mock reason for now) |
 
 ---
 
