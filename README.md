@@ -130,7 +130,7 @@ Notification emails received in a live Gmail inbox during testing: Q4 check-in r
 | BRD requirement | Implementation |
 |-----------------|----------------|
 | Thrust area, title, description per goal | `goals` table; five fields captured on creation |
-| 5 unit-of-measure types | `numeric_max` (Numeric↑), `numeric_min` (Numeric↓), `percent`, `timeline`, `zero` — each with its own scoring formula |
+| 5 unit-of-measure types | `numeric_min` (Numeric↑, higher = better), `numeric_max` (Numeric↓, lower = better), `percent`, `timeline`, `zero` — each with its own scoring formula |
 | Weightage = 100 %, each ≥ 10 %, max 8 goals | Enforced in both client (live meter, disabled submit) and server (API validates before state change) |
 | Manager inline edit before approval | Manager can patch target/description/weightage; all edits logged |
 | Approve → lock sheet | `status = approved`, `locked_at` timestamp set; subsequent employee edits go to audit with `post_lock = true` |
@@ -148,13 +148,13 @@ Notification emails received in a live Gmail inbox during testing: Q4 check-in r
 
 #### UoM scoring formulas
 
-| UoM | Formula | Cap |
-|-----|---------|-----|
-| Numeric↑ (higher = better) | Achievement ÷ Target | 1.5× target |
-| Numeric↓ (lower = better) | Target ÷ Achievement | 1.5× |
-| Percent | Achievement ÷ Target | 1.5× |
-| Timeline | On/before deadline → 100 %; after → 50 % | — |
-| Zero-based | Actual = 0 → 100 %; any non-zero → 0 % | — |
+| UoM (code field) | Formula | Cap |
+|------------------|---------|-----|
+| Numeric↑ — higher is better (`numeric_min`) | Achievement ÷ Target | 1.5× |
+| Numeric↓ — lower is better (`numeric_max`) | Target ÷ Achievement | 1.5× |
+| Percent (`percent`) | Achievement ÷ Target | 1.5× |
+| Timeline (`timeline`) | On/before deadline → 100 %; after → 50 % | — |
+| Zero-based (`zero`) | Actual = 0 → 100 %; any non-zero → 0 % | — |
 
 Weighted score = Σ (goal score × goal weightage).
 
@@ -179,9 +179,11 @@ Implemented via **MSAL Node** (OAuth2 authorization-code flow):
 2. Microsoft redirects back to `/api/auth/sso/callback` with an auth code.
 3. The server exchanges the code for tokens, calls **Microsoft Graph** (`/me`, `/me/memberOf`, `/me/manager`) to retrieve profile, AAD group membership, and reporting-line.
 4. Group membership is mapped to portal role: `AtombergAdmin` → `admin`, `AtombergManager` → `manager`, default → `employee`.
-5. A short-lived HMAC-signed SSO token is issued, redirected to the React client, and exchanged for a standard bearer token — keeping the OAuth redirect chain away from the SPA.
+5. An HMAC-signed bearer token is issued and handed to the React client via the post-login redirect; the client stores it and uses it for all subsequent API calls — the same token format as local login.
 
 The SSO button only appears when `AZURE_*` env vars are set (checked via `/api/auth/sso/status`). Without credentials the portal degrades gracefully to local auth.
+
+> **Prod-hardening note:** for the hackathon demo the bearer token is passed on the redirect query string and has no expiry. In production this should move to a short-lived, single-use exchange code (POST'd from the client) and the bearer token should carry a TTL — avoiding token exposure via browser history, referrer headers, or server logs.
 
 ### Email & Teams notifications (Bonus 5.2)
 
@@ -231,7 +233,7 @@ Available from Node 22.5. No separate DB process, no ORM, no binary dependency �
 
 ### HMAC bearer tokens (stateless auth)
 
-No session store, no Redis dependency. Each token encodes `{ userId, role, iat, exp }` and is verified with a server-side secret. Stateless tokens survive server restarts (which happen frequently on free-tier hosts) without logging anyone out.
+No session store, no Redis dependency. Each token is `userId.HMAC-SHA256(userId)`, verified against a server-side secret on every request — the role and profile are looked up fresh from the DB at verify time, so a role change takes effect immediately without re-issuing tokens. Stateless tokens survive server restarts (which happen frequently on free-tier hosts) without logging anyone out.
 
 ### React + Vite + Tailwind v4
 

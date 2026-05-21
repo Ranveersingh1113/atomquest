@@ -224,9 +224,14 @@ function evaluateEscalations() {
       if (q) {
         const checkin = db.prepare('SELECT id FROM checkins WHERE sheet_id=? AND quarter=?')
           .get(s.id, q);
-        if (!checkin)
+        if (!checkin) {
+          // Severity scales with how long the quarter has been open (same day-math as rules 1 & 2).
+          const qOpen = cycle[`q${q.slice(1)}_open`];
+          const overdue = qOpen ? days(qOpen, today) : 0;
           found.push({ rule: 'Check-in overdue', employee_id: s.employee_id,
-            detail: `${s.emp} — ${q} check-in not completed`, level: 'L2 - Manager' });
+            detail: `${s.emp} — ${q} check-in not completed (${overdue} days since window opened)`,
+            level: escLevel(overdue) });
+        }
       }
     }
   }
