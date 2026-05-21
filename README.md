@@ -119,7 +119,7 @@ Admins configure the Microsoft Teams webhook URL in-app (no redeploy needed). SM
 
 ![Email notifications received in Gmail](docs/screenshots/email-notifications.png)
 
-Ten notification emails received in a live Gmail inbox during testing: Q4 check-in reminders, goal submitted, goal approved, goal returned for rework. These are real SMTP sends from the production deployment — not mocked.
+Notification emails received in a live Gmail inbox during testing: Q4 check-in reminders, goal submitted, goal approved, goal returned for rework. These are real SMTP sends from the production deployment — not mocked.
 
 ---
 
